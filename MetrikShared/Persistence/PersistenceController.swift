@@ -16,14 +16,14 @@ public enum PersistenceController {
         let config: ModelConfiguration
         if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
             config = ModelConfiguration(
-                "Metrik-v2",
+                "Metrik-v3",
                 schema: schema,
-                url: containerURL.appendingPathComponent("Metrik-v2.store"),
+                url: containerURL.appendingPathComponent("Metrik-v3.store"),
                 allowsSave: true
             )
         } else {
             config = ModelConfiguration(
-                "Metrik-v2",
+                "Metrik-v3",
                 schema: schema,
                 allowsSave: true
             )

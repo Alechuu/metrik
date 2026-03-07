@@ -28,6 +28,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        statusBarController?.showPopover()
+        return false
+    }
+
     @objc private func handleOpenSettings() {
         statusBarController?.closePopover()
 

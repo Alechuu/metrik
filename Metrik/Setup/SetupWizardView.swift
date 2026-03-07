@@ -11,6 +11,8 @@ struct SetupWizardView: View {
     @State private var isScanning = false
     @State private var gitUserName = ""
     @State private var gitUserEmail = ""
+    @State private var goalValue = 500.0
+    @State private var goalUnit: GoalUnit = .perWeek
     @State private var isSaving = false
 
     struct ScannedRepo: Identifiable {
@@ -27,7 +29,7 @@ struct SetupWizardView: View {
                 Text("Metrik Setup")
                     .font(.headline)
                 Spacer()
-                Text("Step \(step) of 3")
+                Text("Step \(step) of 4")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -42,6 +44,7 @@ struct SetupWizardView: View {
                 case 1: selectDirectoryStep
                 case 2: selectReposStep
                 case 3: confirmIdentityStep
+                case 4: codingGoalStep
                 default: EmptyView()
                 }
             }
@@ -77,11 +80,18 @@ struct SetupWizardView: View {
                     .disabled(scannedRepos.filter(\.isSelected).isEmpty)
 
                 case 3:
+                    Button("Next") {
+                        step = 4
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(gitUserName.isEmpty || gitUserEmail.isEmpty)
+
+                case 4:
                     Button("Finish") {
                         saveConfiguration()
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(gitUserName.isEmpty || gitUserEmail.isEmpty || isSaving)
+                    .disabled(goalValue <= 0 || isSaving)
 
                 default:
                     EmptyView()
@@ -229,6 +239,54 @@ struct SetupWizardView: View {
         .padding(40)
     }
 
+    // MARK: - Step 4: Coding Goal
+
+    private var codingGoalStep: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "target")
+                .font(.system(size: 40))
+                .foregroundStyle(.orange)
+
+            Text("Your Coding Goal")
+                .font(.title3.bold())
+
+            Text("Set how many lines you aim to merge. The menu bar will show your progress.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 280)
+
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Expected lines")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                    TextField("500", value: $goalValue, format: .number)
+                        .textFieldStyle(.roundedBorder)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Per")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                    Picker("", selection: $goalUnit) {
+                        ForEach(GoalUnit.allCases, id: \.self) { unit in
+                            Text(unit.label).tag(unit)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+            .frame(maxWidth: 280)
+
+            if isSaving {
+                ProgressView()
+                    .controlSize(.small)
+            }
+        }
+        .padding(40)
+    }
+
     // MARK: - Actions
 
     private func chooseDirectory() {
@@ -288,6 +346,19 @@ struct SetupWizardView: View {
                 )
                 modelContext.insert(tracked)
             }
+
+            // Ensure UserSettings exists and set coding goal
+            let settingsDescriptor = FetchDescriptor<UserSettings>()
+            let settings = try? modelContext.fetch(settingsDescriptor).first
+            let userSettings: UserSettings
+            if let settings {
+                userSettings = settings
+            } else {
+                userSettings = UserSettings()
+                modelContext.insert(userSettings)
+            }
+            userSettings.goalValue = goalValue
+            userSettings.goalUnitRawValue = goalUnit.rawValue
 
             try? modelContext.save()
 

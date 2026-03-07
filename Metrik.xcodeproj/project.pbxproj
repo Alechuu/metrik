@@ -43,6 +43,7 @@
 		A7A1CE4A2F7920B8435DACCE /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA3B12FE8231DD2D5EF0C25 /* SyncService.swift */; };
 		A925A176538AAD6E16DF0F8B /* PulseEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D73C82010A652F9AA9FD56B /* PulseEffect.swift */; };
 		AABC4C93CDBDA6EDD7836484 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A199830696DA204B8B56A /* DashboardView.swift */; };
+		B1E2F40A3C8D5E9F01ABCDEF /* OffDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E2F40B3C8D5E9F01ABCDEF /* OffDayView.swift */; };
 		AC9F3E01891D2FC5D5E415AD /* MetrikWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1307FDEBCD569E5A0468D06B /* MetrikWidget.swift */; };
 		AFBA8209681CE897482EFEAF /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2330D4AAC9CB65340F45E11D /* DebugSettingsView.swift */; };
 		B11A8309F9A2736A6DBBD100 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFF699C781BD65BB3D6193A /* UserSettings.swift */; };
@@ -133,6 +134,7 @@
 		DACAF25C965D3515501D030F /* TrackedRepo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackedRepo.swift; sourceTree = "<group>"; };
 		DC924180EC827CC818BC66E8 /* LocalGitConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalGitConfig.swift; sourceTree = "<group>"; };
 		EEAF77121B66FDBEA8C00523 /* Metrik.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Metrik.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1E2F40B3C8D5E9F01ABCDEF /* OffDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffDayView.swift; sourceTree = "<group>"; };
 		F3D39096C914CC4B2F139077 /* MetricsCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsCalculatorTests.swift; sourceTree = "<group>"; };
 		FBED8E5BCD6BF46AA51C5BF4 /* MetricsSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsSummaryView.swift; sourceTree = "<group>"; };
 		FE2A199830696DA204B8B56A /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -258,6 +260,7 @@
 				FE2A199830696DA204B8B56A /* DashboardView.swift */,
 				7F6851AB2C7D11DCFE7AECA2 /* HorizontalBarChartView.swift */,
 				FBED8E5BCD6BF46AA51C5BF4 /* MetricsSummaryView.swift */,
+				B1E2F40B3C8D5E9F01ABCDEF /* OffDayView.swift */,
 				69484541EA353610C8E33500 /* RecentActivityList.swift */,
 				6E0826455B48B2D33C4C85F6 /* TimeRangePickerView.swift */,
 			);
@@ -494,6 +497,7 @@
 				0B09115C6602179EBD03CF49 /* MergedCommit.swift in Sources */,
 				DC55BE8A05DBBC55F29B85B9 /* MetricsCalculator.swift in Sources */,
 				38FADF50D801E9DFCBC6C912 /* MetricsSummaryView.swift in Sources */,
+				B1E2F40A3C8D5E9F01ABCDEF /* OffDayView.swift in Sources */,
 				3B6FA2691D48E61B6A15F8BB /* MetrikApp.swift in Sources */,
 				1CF3460D5DD16232D8231561 /* PersistenceController.swift in Sources */,
 				4513698A61D515FDEDABD458 /* PopoverContentView.swift in Sources */,

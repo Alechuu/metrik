@@ -3,6 +3,7 @@ import SwiftData
 import ServiceManagement
 
 struct GeneralSettingsView: View {
+    var appState: AppState
     @Environment(\.modelContext) private var modelContext
     @Query private var settingsList: [UserSettings]
 
@@ -12,6 +13,40 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
+            Section("Coding Goal") {
+                HStack {
+                    Text("Expected lines")
+                    Spacer()
+                    TextField("", value: Binding(
+                        get: { settings.goalValue },
+                        set: { newValue in
+                            settings.goalValue = newValue
+                            try? modelContext.save()
+                            appState.refreshMetrics(modelContext: modelContext)
+                        }
+                    ), format: .number)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 80)
+                    .multilineTextAlignment(.trailing)
+                }
+
+                Picker("Per", selection: Binding(
+                    get: { GoalUnit(rawValue: settings.goalUnitRawValue) ?? .perWeek },
+                    set: { newValue in
+                        settings.goalUnitRawValue = newValue.rawValue
+                        try? modelContext.save()
+                        appState.refreshMetrics(modelContext: modelContext)
+                    }
+                )) {
+                    Text("Per week").tag(GoalUnit.perWeek)
+                    Text("Per hour").tag(GoalUnit.perHour)
+                }
+            }
+
+            Section("Working Days") {
+                workingDaysPicker
+            }
+
             Section("Working Hours") {
                 HStack {
                     Text("Hours per day")
@@ -75,6 +110,40 @@ struct GeneralSettingsView: View {
         .onAppear {
             ensureSettings()
         }
+    }
+
+    private static let weekdaySymbols: [(id: Int, short: String)] = {
+        let cal = Calendar.current
+        return (1...7).map { ($0, cal.shortWeekdaySymbols[$0 - 1]) }
+    }()
+
+    private var workingDaysPicker: some View {
+        HStack(spacing: 6) {
+            ForEach(Self.weekdaySymbols, id: \.id) { day in
+                let isOn = settings.workingDays.contains(day.id)
+                Button {
+                    var days = settings.workingDays
+                    if isOn { days.remove(day.id) } else { days.insert(day.id) }
+                    settings.workingDays = days
+                    try? modelContext.save()
+                } label: {
+                    Text(day.short)
+                        .font(.caption.bold())
+                        .frame(width: 36, height: 28)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(isOn ? Color.accentColor : Color.clear)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .stroke(isOn ? Color.clear : Color.secondary.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundStyle(isOn ? .white : .secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func ensureSettings() {

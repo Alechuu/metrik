@@ -5,7 +5,7 @@ struct SettingsWindow: View {
 
     var body: some View {
         TabView {
-            GeneralSettingsView()
+            GeneralSettingsView(appState: appState)
                 .tabItem {
                     Label("General", systemImage: "gearshape")
                 }

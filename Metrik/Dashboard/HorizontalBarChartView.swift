@@ -21,12 +21,17 @@ struct HorizontalBarChartView: View {
                 let maxRate = repos.map(\.linesPerHour).max() ?? 1
 
                 ForEach(Array(repos.prefix(5).enumerated()), id: \.element.id) { index, repo in
-                    HStack(spacing: 8) {
-                        Text(repo.repoName)
-                            .font(.caption)
-                            .frame(width: 80, alignment: .trailing)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(repo.repoName)
+                                .font(.caption)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer()
+                            Text(String(format: "%.1f/hr", repo.linesPerHour))
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
 
                         GeometryReader { geo in
                             let barWidth = maxRate > 0
@@ -38,12 +43,7 @@ struct HorizontalBarChartView: View {
                                 .frame(width: max(barWidth, 2), height: geo.size.height)
                                 .animation(.spring(duration: 0.6, bounce: 0.15), value: repo.linesPerHour)
                         }
-                        .frame(height: 16)
-
-                        Text(String(format: "%.1f/hr", repo.linesPerHour))
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            .frame(width: 55, alignment: .trailing)
+                        .frame(height: 8)
                     }
                 }
             }

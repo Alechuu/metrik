@@ -4,6 +4,7 @@ import SwiftData
 struct DashboardView: View {
     @Bindable var appState: AppState
     @Environment(\.modelContext) private var modelContext
+    @Query private var settingsList: [UserSettings]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,31 +40,32 @@ struct DashboardView: View {
 
             Divider()
 
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Metrics Summary
-                    MetricsSummaryView(metrics: appState.metrics)
-                        .padding(.horizontal, 16)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                            removal: .move(edge: .leading).combined(with: .opacity)
-                        ))
+            if isOffDay {
+                OffDayView()
+                    .frame(maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        MetricsSummaryView(
+                            metrics: appState.metrics,
+                            goalMetric: selectedGoalMetric
+                        )
+                            .padding(.horizontal, 16)
 
-                    Divider()
-                        .padding(.horizontal, 16)
+                        Divider()
+                            .padding(.horizontal, 16)
 
-                    // Bar Chart
-                    HorizontalBarChartView(repos: appState.metrics.repoBreakdown)
-                        .padding(.horizontal, 16)
+                        HorizontalBarChartView(repos: appState.metrics.repoBreakdown)
+                            .padding(.horizontal, 16)
 
-                    Divider()
-                        .padding(.horizontal, 16)
+                        Divider()
+                            .padding(.horizontal, 16)
 
-                    // Recent Activity
-                    RecentActivityList()
-                        .padding(.horizontal, 16)
+                        RecentActivityList()
+                            .padding(.horizontal, 16)
+                    }
+                    .padding(.vertical, 8)
                 }
-                .padding(.vertical, 8)
             }
 
             Divider()
@@ -117,6 +119,49 @@ struct DashboardView: View {
             let settingsDescriptor = FetchDescriptor<UserSettings>()
             let interval = (try? modelContext.fetch(settingsDescriptor).first?.syncIntervalMinutes) ?? 15
             appState.syncService.startScheduledSync(modelContext: modelContext, intervalMinutes: interval)
+        }
+    }
+
+    private var isOffDay: Bool {
+        guard appState.selectedTimeRange == .today else { return false }
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        let settings = settingsList.first ?? UserSettings()
+        return !settings.isWorkingDay(weekday)
+    }
+
+    private var selectedGoalMetric: GoalProgressMetric? {
+        guard appState.hasCodingGoal else { return nil }
+
+        switch appState.selectedTimeRange {
+        case .today:
+            return GoalProgressMetric(
+                title: "Daily Contribution Goal",
+                subtitle: "Daily goal",
+                progress: appState.dayProgress,
+                color: .green,
+                currentLines: appState.metricsToday.additions,
+                expectedLines: appState.expectedDayLines
+            )
+        case .thisWeek:
+            return GoalProgressMetric(
+                title: "Weekly Contribution Goal",
+                subtitle: "Weekly goal",
+                progress: appState.weekProgress,
+                color: .green,
+                currentLines: appState.metricsWeek.additions,
+                expectedLines: appState.expectedWeekLines
+            )
+        case .thisMonth:
+            return GoalProgressMetric(
+                title: "Monthly Contribution Goal",
+                subtitle: "Monthly goal",
+                progress: appState.monthProgress,
+                color: .green,
+                currentLines: appState.metricsMonth.additions,
+                expectedLines: appState.expectedMonthLines
+            )
+        case .allTime:
+            return nil
         }
     }
 }
