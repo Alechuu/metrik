@@ -70,7 +70,8 @@ public struct MetricsCalculator {
         commits: [MergedCommit],
         timeRange: TimeRange,
         hoursPerDay: Double,
-        hoursPerWeek: Double
+        hoursPerWeek: Double,
+        workingDays: Set<Int> = [2, 3, 4, 5, 6]
     ) -> MetricsSummary {
         let range = timeRange.dateRange
         let filtered = commits.filter { $0.committedAt >= range.start && $0.committedAt <= range.end }
@@ -81,7 +82,8 @@ public struct MetricsCalculator {
         let workingHours = calculateWorkingHours(
             timeRange: timeRange,
             hoursPerDay: hoursPerDay,
-            hoursPerWeek: hoursPerWeek
+            hoursPerWeek: hoursPerWeek,
+            workingDays: workingDays
         )
 
         let linesPerHour = workingHours > 0 ? Double(totalAdditions) / workingHours : 0
@@ -115,26 +117,61 @@ public struct MetricsCalculator {
     private func calculateWorkingHours(
         timeRange: TimeRange,
         hoursPerDay: Double,
-        hoursPerWeek: Double
+        hoursPerWeek: Double,
+        workingDays: Set<Int>
     ) -> Double {
         let calendar = Calendar.current
+        let now = Date()
 
         switch timeRange {
         case .today:
-            let now = Date()
             let startOfDay = calendar.startOfDay(for: now)
             let elapsed = now.timeIntervalSince(startOfDay) / 3600
             return min(elapsed, hoursPerDay)
 
         case .thisWeek:
-            let weekday = calendar.component(.weekday, from: Date())
-            let workingDaysSoFar = max(1, weekday - 1)
-            return min(Double(workingDaysSoFar) * hoursPerDay, hoursPerWeek)
+            let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
+            let todayStart = calendar.startOfDay(for: now)
+            var totalHours: Double = 0
+            var date = weekStart
+
+            while date < todayStart {
+                let wd = calendar.component(.weekday, from: date)
+                if workingDays.contains(wd) {
+                    totalHours += hoursPerDay
+                }
+                date = calendar.date(byAdding: .day, value: 1, to: date)!
+            }
+
+            let todayWeekday = calendar.component(.weekday, from: now)
+            if workingDays.contains(todayWeekday) {
+                let elapsed = now.timeIntervalSince(todayStart) / 3600
+                totalHours += min(elapsed, hoursPerDay)
+            }
+
+            return min(max(totalHours, 1), hoursPerWeek)
 
         case .thisMonth:
-            let day = calendar.component(.day, from: Date())
-            let weekCount = Double(day) / 7.0
-            return weekCount * hoursPerWeek
+            let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+            let todayStart = calendar.startOfDay(for: now)
+            var totalHours: Double = 0
+            var date = monthStart
+
+            while date < todayStart {
+                let wd = calendar.component(.weekday, from: date)
+                if workingDays.contains(wd) {
+                    totalHours += hoursPerDay
+                }
+                date = calendar.date(byAdding: .day, value: 1, to: date)!
+            }
+
+            let todayWeekday = calendar.component(.weekday, from: now)
+            if workingDays.contains(todayWeekday) {
+                let elapsed = now.timeIntervalSince(todayStart) / 3600
+                totalHours += min(elapsed, hoursPerDay)
+            }
+
+            return max(totalHours, 1)
 
         case .allTime:
             let range = timeRange.dateRange

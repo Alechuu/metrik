@@ -230,7 +230,7 @@ struct ActivityDetailView: View {
     }
 
     private func openCommitInBrowser(_ commit: MergedCommit) {
-        Task {
+        _ = Task {
             let remote: String?
             if let cached = remoteURLCache[commit.repoPath] {
                 remote = cached

@@ -21,6 +21,15 @@ struct DashboardView: View {
                 }
                 .buttonStyle(.borderless)
                 .keyboardShortcut(",", modifiers: .command)
+
+                Button {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(.borderless)
+                .keyboardShortcut("q", modifiers: .command)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)

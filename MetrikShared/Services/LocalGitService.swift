@@ -118,8 +118,13 @@ public actor LocalGitService {
         return URL(string: "\(cleaned)/commit/\(sha)")
     }
 
+    public func resolveRemoteHead(repoPath: String, branch: String) -> String? {
+        runGit(args: ["rev-parse", "origin/\(branch)"], in: repoPath)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     public func fetchOrigin(repoPath: String) async throws {
-        let result = runGitWithExitCode(args: ["fetch", "origin", "--prune", "--quiet"], in: repoPath)
+        let result = await runGitAsync(args: ["fetch", "origin", "--prune", "--quiet"], in: repoPath)
         if result.exitCode != 0 {
             throw LocalGitError.fetchFailed(repoPath: repoPath, message: result.output ?? "Unknown error")
         }
@@ -130,7 +135,7 @@ public actor LocalGitService {
         branch: String,
         authorEmail: String,
         since: Date
-    ) -> [CommitInfo] {
+    ) async -> [CommitInfo] {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let sinceStr = formatter.string(from: since)
@@ -140,10 +145,11 @@ public actor LocalGitService {
         let sinceArg = "--since=\(sinceStr)"
         let refArg = "origin/\(branch)"
 
-        guard let output = runGit(
+        let result = await runGitAsync(
             args: ["log", refArg, authorArg, "--format=\(format)", "--numstat", sinceArg],
             in: repoPath
-        ) else { return [] }
+        )
+        guard result.exitCode == 0, let output = result.output else { return [] }
 
         return parseGitLog(output)
     }
@@ -194,11 +200,11 @@ public actor LocalGitService {
     }
 
     private func runGit(args: [String], in directory: String) -> String? {
-        let result = runGitWithExitCode(args: args, in: directory)
+        let result = runGitSync(args: args, in: directory)
         return result.exitCode == 0 ? result.output : nil
     }
 
-    private func runGitWithExitCode(args: [String], in directory: String) -> (output: String?, exitCode: Int32) {
+    private func runGitSync(args: [String], in directory: String) -> (output: String?, exitCode: Int32) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
         process.arguments = args
@@ -211,12 +217,36 @@ public actor LocalGitService {
         do {
             try process.run()
             process.waitUntilExit()
-
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: data, encoding: .utf8)
             return (output, process.terminationStatus)
         } catch {
             return (nil, -1)
+        }
+    }
+
+    private func runGitAsync(args: [String], in directory: String) async -> (output: String?, exitCode: Int32) {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+                process.arguments = args
+                process.currentDirectoryURL = URL(fileURLWithPath: directory)
+
+                let pipe = Pipe()
+                process.standardOutput = pipe
+                process.standardError = pipe
+
+                do {
+                    try process.run()
+                    process.waitUntilExit()
+                    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                    let output = String(data: data, encoding: .utf8)
+                    continuation.resume(returning: (output, process.terminationStatus))
+                } catch {
+                    continuation.resume(returning: (nil, -1))
+                }
+            }
         }
     }
 }

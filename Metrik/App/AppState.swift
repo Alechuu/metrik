@@ -48,25 +48,29 @@ final class AppState {
                 commits: allCommits,
                 timeRange: .today,
                 hoursPerDay: settings.hoursPerDay,
-                hoursPerWeek: settings.hoursPerWeek
+                hoursPerWeek: settings.hoursPerWeek,
+                workingDays: settings.workingDays
             )
             metricsWeek = metricsCalculator.calculate(
                 commits: allCommits,
                 timeRange: .thisWeek,
                 hoursPerDay: settings.hoursPerDay,
-                hoursPerWeek: settings.hoursPerWeek
+                hoursPerWeek: settings.hoursPerWeek,
+                workingDays: settings.workingDays
             )
             metricsMonth = metricsCalculator.calculate(
                 commits: allCommits,
                 timeRange: .thisMonth,
                 hoursPerDay: settings.hoursPerDay,
-                hoursPerWeek: settings.hoursPerWeek
+                hoursPerWeek: settings.hoursPerWeek,
+                workingDays: settings.workingDays
             )
             metrics = metricsCalculator.calculate(
                 commits: allCommits,
                 timeRange: selectedTimeRange,
                 hoursPerDay: settings.hoursPerDay,
-                hoursPerWeek: settings.hoursPerWeek
+                hoursPerWeek: settings.hoursPerWeek,
+                workingDays: settings.workingDays
             )
 
             let expectedDay: Double
