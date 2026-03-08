@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct RepoSelectionView: View {
     @Bindable var appState: AppState
@@ -93,6 +94,13 @@ struct RepoSelectionView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
+                Button {
+                    addReposManually()
+                } label: {
+                    Label("Add Repositories", systemImage: "plus")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
             }
             .padding(.horizontal)
             .padding(.vertical, 6)
@@ -101,6 +109,44 @@ struct RepoSelectionView: View {
             if repos.isEmpty {
                 rescanRepos()
             }
+        }
+    }
+
+    private func addReposManually() {
+        let panel = NSOpenPanel()
+        panel.title = "Select Git Repositories"
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = true
+        panel.message = "Select one or more folders that contain a .git directory."
+
+        guard panel.runModal() == .OK else { return }
+
+        _ = Task {
+            for url in panel.urls {
+                let path = url.path
+                let gitDir = url.appendingPathComponent(".git")
+                guard FileManager.default.fileExists(atPath: gitDir.path) else { continue }
+
+                let existingDescriptor = FetchDescriptor<TrackedRepo>(
+                    predicate: #Predicate { $0.localPath == path }
+                )
+                let existing = try? modelContext.fetch(existingDescriptor)
+                guard existing?.isEmpty ?? true else { continue }
+
+                let defaultBranch = await appState.syncService.detectDefaultBranch(repoPath: path)
+                let repo = TrackedRepo(
+                    localPath: path,
+                    name: url.lastPathComponent,
+                    defaultBranch: defaultBranch,
+                    isTracked: true
+                )
+                modelContext.insert(repo)
+            }
+
+            try? modelContext.save()
+            await appState.syncService.sync(modelContext: modelContext)
+            appState.refreshMetrics(modelContext: modelContext)
         }
     }
 

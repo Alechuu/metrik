@@ -46,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = "Metrik Settings"
             window.setContentSize(NSSize(width: 500, height: 450))
             window.styleMask = [.titled, .closable, .miniaturizable]
+            window.level = .floating
             window.center()
             settingsWindow = window
         }
@@ -68,6 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.setContentSize(NSSize(width: 700, height: 600))
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             window.minSize = NSSize(width: 500, height: 400)
+            window.level = .floating
             window.center()
             activityWindow = window
         }

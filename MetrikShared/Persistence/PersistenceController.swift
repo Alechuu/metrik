@@ -2,8 +2,6 @@ import Foundation
 import SwiftData
 
 public enum PersistenceController {
-    public static let appGroupID = "group.com.metrik"
-
     public static var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             MergedCommit.self,
@@ -13,21 +11,11 @@ public enum PersistenceController {
             UserSettings.self
         ])
 
-        let config: ModelConfiguration
-        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
-            config = ModelConfiguration(
-                "Metrik-v3",
-                schema: schema,
-                url: containerURL.appendingPathComponent("Metrik-v3.store"),
-                allowsSave: true
-            )
-        } else {
-            config = ModelConfiguration(
-                "Metrik-v3",
-                schema: schema,
-                allowsSave: true
-            )
-        }
+        let config = ModelConfiguration(
+            "Metrik-v3",
+            schema: schema,
+            allowsSave: true
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [config])

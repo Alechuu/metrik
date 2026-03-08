@@ -36,13 +36,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: true
         COMBINE_HIDPI_IMAGES: true
-    entitlements:
-      path: Metrik/Metrik.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.metrik
-    dependencies:
-      - target: MetrikWidgetExtension
+    dependencies: []
 
   MetrikShared:
     type: framework
@@ -53,29 +47,6 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.metrik.shared
         PRODUCT_NAME: MetrikShared
-
-  MetrikWidgetExtension:
-    type: app-extension
-    platform: macOS
-    sources:
-      - path: MetrikWidget
-      - path: MetrikShared
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.metrik.app.widget
-        INFOPLIST_KEY_CFBundleDisplayName: MetrikWidget
-        INFOPLIST_KEY_NSHumanReadableCopyright: ""
-        CODE_SIGN_ENTITLEMENTS: MetrikWidget/MetrikWidget.entitlements
-        PRODUCT_NAME: MetrikWidgetExtension
-        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks"
-        ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME: WidgetBackground
-    entitlements:
-      path: MetrikWidget/MetrikWidget.entitlements
-    info:
-      path: MetrikWidget/Info.plist
-      properties:
-        NSExtension:
-          NSExtensionPointIdentifier: com.apple.widgetkit-extension
 
   MetrikTests:
     type: bundle.unit-test

@@ -11,7 +11,7 @@ A macOS menu bar app that tracks your coding activity from local Git repositorie
 - **Repo breakdown** — Horizontal bar chart of contributions per repository
 - **Recent activity** — List of recent commits with details
 - **Working days** — Configure which weekdays count (e.g. Mon–Fri) so weekends show an “off day” view
-- **Widget** — macOS widget extension (small and medium) for a quick glance
+
 - **Settings** — Hours per day/week, sync interval, launch at login, Git identity, repo selection
 
 ## Requirements
@@ -48,7 +48,7 @@ After setup, the app syncs commits from the selected repos on an interval (defau
 
 - **Metrik** — Main app: menu bar (status item), popover, dashboard, setup wizard, settings windows.
 - **MetrikShared** — Shared logic: `LocalGitService` (repo scan, commit reading), `MetricsCalculator`, SwiftData models (`UserSettings`, `MergedCommit`, `TrackedRepo`, `LocalGitConfig`, `DailySummary`), `SyncService`, `PersistenceController`.
-- **MetrikWidgetExtension** — Widget extension (small/medium) and timeline provider.
+
 
 Data is stored locally with **SwiftData**; no server or account is used.
 

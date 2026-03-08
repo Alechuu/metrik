@@ -14,7 +14,7 @@
 		0ADB165AB7CDDA6B9EFA122C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B32C6C4B0C4E4E5EC3D0654 /* Assets.xcassets */; };
 		0B09115C6602179EBD03CF49 /* MergedCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E4684B00F5E14B910D6D825 /* MergedCommit.swift */; };
 		0F7C1423750D181C377CA7C7 /* DailySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EF8D1DC045DA8EE44FA61C /* DailySummary.swift */; };
-		1CBA57E31E123FCCEA5C923E /* MediumWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42EF55805B269CE48C1E2287 /* MediumWidgetView.swift */; };
+
 		1CF3460D5DD16232D8231561 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7077E3EF1178D8265A9195B /* PersistenceController.swift */; };
 		31BA361C9FC775424FF753BB /* LocalGitConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC924180EC827CC818BC66E8 /* LocalGitConfig.swift */; };
 		3454F2451BACEC22E1E6291D /* LocalGitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65728D77F1453159F191536 /* LocalGitService.swift */; };
@@ -29,10 +29,10 @@
 		585DDEACF907412FD7D165D0 /* LocalGitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65728D77F1453159F191536 /* LocalGitService.swift */; };
 		61A46A5F48CDF26E5B9B455D /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA3B12FE8231DD2D5EF0C25 /* SyncService.swift */; };
 		63E034B56BE2C7426DAE9201 /* ActivityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75958D168BF781DA84DA7FA3 /* ActivityDetailView.swift */; };
-		6ADE65BDF956CFAA750D4188 /* SmallWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E7B386A7A5F0142D008DB8 /* SmallWidgetView.swift */; };
+
 		7825942E092353C232FCEDBF /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E2A5A43A7D61F7861E377B /* AnimatedCounter.swift */; };
 		7B5E6F47A6C888F5704AC81E /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFF699C781BD65BB3D6193A /* UserSettings.swift */; };
-		7BB38367ABBC3FA86E048CB7 /* MetrikWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D74E8996E38AE6E91F37CADC /* MetrikWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+
 		85E3E9B55766EFCAD8A52595 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7077E3EF1178D8265A9195B /* PersistenceController.swift */; };
 		8BDE9531A15A82306446932B /* MergedCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E4684B00F5E14B910D6D825 /* MergedCommit.swift */; };
 		8EF0FF709F7785C023F4E878 /* TrackedRepo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACAF25C965D3515501D030F /* TrackedRepo.swift */; };
@@ -44,16 +44,16 @@
 		A925A176538AAD6E16DF0F8B /* PulseEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D73C82010A652F9AA9FD56B /* PulseEffect.swift */; };
 		AABC4C93CDBDA6EDD7836484 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A199830696DA204B8B56A /* DashboardView.swift */; };
 		B1E2F40A3C8D5E9F01ABCDEF /* OffDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E2F40B3C8D5E9F01ABCDEF /* OffDayView.swift */; };
-		AC9F3E01891D2FC5D5E415AD /* MetrikWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1307FDEBCD569E5A0468D06B /* MetrikWidget.swift */; };
+
 		AFBA8209681CE897482EFEAF /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2330D4AAC9CB65340F45E11D /* DebugSettingsView.swift */; };
 		B11A8309F9A2736A6DBBD100 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFF699C781BD65BB3D6193A /* UserSettings.swift */; };
 		B191C24C92ECE3C21D4DBCA6 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA3B12FE8231DD2D5EF0C25 /* SyncService.swift */; };
-		BDDFC85D007CA5F5ED5396D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D979B513933DAD4AA73DCF24 /* Assets.xcassets */; };
+
 		C5A9FA71FEFA5E5ABA408BFB /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFF699C781BD65BB3D6193A /* UserSettings.swift */; };
 		C8EE7D756E3C79BF20DA82C3 /* LocalGitConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC924180EC827CC818BC66E8 /* LocalGitConfig.swift */; };
 		CE583967B8244631930441D8 /* DailySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EF8D1DC045DA8EE44FA61C /* DailySummary.swift */; };
 		D4FA554DB2DCABD28E41AF3F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A2E9D8F151CC47C986D4BB2 /* AppState.swift */; };
-		DA18512B64AC9C1444D4D57F /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D91479CC423BDE98494289 /* Provider.swift */; };
+
 		DA19E9CE0C9342C061206C08 /* SetupWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9C0F8565F3DB7AC6761D7E1 /* SetupWizardView.swift */; };
 		DB1135740E9085D6920493DF /* AccountSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77CBF4880B2180C1A1E5FE02 /* AccountSettingsView.swift */; };
 		DC55BE8A05DBBC55F29B85B9 /* MetricsCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F9C9C936F338A7FBD1222C /* MetricsCalculator.swift */; };
@@ -72,42 +72,25 @@
 			remoteGlobalIDString = 798EF4C04AB4C176EC913724;
 			remoteInfo = Metrik;
 		};
-		BC3D143EE6168813E5FB17BE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F69E08822231BD72DC236F74 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C1ACBA1E0AE21A28DF7DC747;
-			remoteInfo = MetrikWidgetExtension;
-		};
+
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		B8624E1F0679E53A6F8F4208 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				7BB38367ABBC3FA86E048CB7 /* MetrikWidgetExtension.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		033309E98F3C7F59871CC328 /* RepoSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoSelectionView.swift; sourceTree = "<group>"; };
 		09CDD3ECCB9C78B9F3EA9D80 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
-		0E9CF570E8D0EDF63FE8F85C /* MetrikWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetrikWidget.entitlements; sourceTree = "<group>"; };
-		10E7B386A7A5F0142D008DB8 /* SmallWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallWidgetView.swift; sourceTree = "<group>"; };
-		1307FDEBCD569E5A0468D06B /* MetrikWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetrikWidget.swift; sourceTree = "<group>"; };
+
+
 		139299939D1F997742797CE2 /* MetrikApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetrikApp.swift; sourceTree = "<group>"; };
 		14E2A5A43A7D61F7861E377B /* AnimatedCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedCounter.swift; sourceTree = "<group>"; };
 		2330D4AAC9CB65340F45E11D /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
 		2C36253E1263CE62DBDFB66E /* MetrikTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MetrikTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		42EF55805B269CE48C1E2287 /* MediumWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediumWidgetView.swift; sourceTree = "<group>"; };
+
+
 		4413042F6C54AE42E8E943B9 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
-		4A47E3BF1AAED2D537B6C46D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+
 		5E4684B00F5E14B910D6D825 /* MergedCommit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergedCommit.swift; sourceTree = "<group>"; };
 		63F046ACB0DF6414C7DE2BF9 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		69484541EA353610C8E33500 /* RecentActivityList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentActivityList.swift; sourceTree = "<group>"; };
@@ -116,7 +99,8 @@
 		77CBF4880B2180C1A1E5FE02 /* AccountSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsView.swift; sourceTree = "<group>"; };
 		7A2E9D8F151CC47C986D4BB2 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		7F6851AB2C7D11DCFE7AECA2 /* HorizontalBarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalBarChartView.swift; sourceTree = "<group>"; };
-		84D91479CC423BDE98494289 /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
+
+
 		8B32C6C4B0C4E4E5EC3D0654 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8D73C82010A652F9AA9FD56B /* PulseEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseEffect.swift; sourceTree = "<group>"; };
 		8FA3B12FE8231DD2D5EF0C25 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
@@ -129,8 +113,8 @@
 		CBAEDDAD36A08CF2E6E2F383 /* PopoverContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverContentView.swift; sourceTree = "<group>"; };
 		D4EF8D1DC045DA8EE44FA61C /* DailySummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailySummary.swift; sourceTree = "<group>"; };
 		D7077E3EF1178D8265A9195B /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
-		D74E8996E38AE6E91F37CADC /* MetrikWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MetrikWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		D979B513933DAD4AA73DCF24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+
+
 		DACAF25C965D3515501D030F /* TrackedRepo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackedRepo.swift; sourceTree = "<group>"; };
 		DC924180EC827CC818BC66E8 /* LocalGitConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalGitConfig.swift; sourceTree = "<group>"; };
 		EEAF77121B66FDBEA8C00523 /* Metrik.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Metrik.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -176,7 +160,7 @@
 				EEAF77121B66FDBEA8C00523 /* Metrik.app */,
 				C0BAA3712C1716F47BA17908 /* MetrikShared.framework */,
 				2C36253E1263CE62DBDFB66E /* MetrikTests.xctest */,
-				D74E8996E38AE6E91F37CADC /* MetrikWidgetExtension.appex */,
+
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -187,7 +171,7 @@
 				A8263B99726D7A121CEF7A2B /* Metrik */,
 				4FB5B5B60EC975801FF36682 /* MetrikShared */,
 				027001B26A0D486095E70955 /* MetrikTests */,
-				9385462FC77F14B4D5CEF86E /* MetrikWidget */,
+
 				131672B308E7A22AF6D36A1F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -239,20 +223,8 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		9385462FC77F14B4D5CEF86E /* MetrikWidget */ = {
-			isa = PBXGroup;
-			children = (
-				D979B513933DAD4AA73DCF24 /* Assets.xcassets */,
-				4A47E3BF1AAED2D537B6C46D /* Info.plist */,
-				42EF55805B269CE48C1E2287 /* MediumWidgetView.swift */,
-				0E9CF570E8D0EDF63FE8F85C /* MetrikWidget.entitlements */,
-				1307FDEBCD569E5A0468D06B /* MetrikWidget.swift */,
-				84D91479CC423BDE98494289 /* Provider.swift */,
-				10E7B386A7A5F0142D008DB8 /* SmallWidgetView.swift */,
-			);
-			path = MetrikWidget;
-			sourceTree = "<group>";
-		};
+
+
 		93F1885FC6A0EBF4E0B06924 /* Dashboard */ = {
 			isa = PBXGroup;
 			children = (
@@ -328,12 +300,11 @@
 			buildPhases = (
 				68DA6203D7E897C10BEFAF2E /* Sources */,
 				B862788362A66BEA8373176A /* Resources */,
-				B8624E1F0679E53A6F8F4208 /* Embed Foundation Extensions */,
+
 			);
 			buildRules = (
 			);
 			dependencies = (
-				FD0FBFE21427919381EAF194 /* PBXTargetDependency */,
 			);
 			name = Metrik;
 			packageProductDependencies = (
@@ -342,24 +313,8 @@
 			productReference = EEAF77121B66FDBEA8C00523 /* Metrik.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C1ACBA1E0AE21A28DF7DC747 /* MetrikWidgetExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F4A1A191EE434BF9C237D203 /* Build configuration list for PBXNativeTarget "MetrikWidgetExtension" */;
-			buildPhases = (
-				5E27772D94610DEB9B0FDA03 /* Sources */,
-				88733CEDD227590B4F340B6A /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = MetrikWidgetExtension;
-			packageProductDependencies = (
-			);
-			productName = MetrikWidgetExtension;
-			productReference = D74E8996E38AE6E91F37CADC /* MetrikWidgetExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
+
+
 		E3799C2F651E3677BC72F4A4 /* MetrikShared */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F8CDFAED3EE2DC61E47A68 /* Build configuration list for PBXNativeTarget "MetrikShared" */;
@@ -392,9 +347,7 @@
 					798EF4C04AB4C176EC913724 = {
 						ProvisioningStyle = Automatic;
 					};
-					C1ACBA1E0AE21A28DF7DC747 = {
-						ProvisioningStyle = Automatic;
-					};
+
 					E3799C2F651E3677BC72F4A4 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -417,20 +370,13 @@
 				798EF4C04AB4C176EC913724 /* Metrik */,
 				E3799C2F651E3677BC72F4A4 /* MetrikShared */,
 				69AFD3CFB4B8261B64C20FA8 /* MetrikTests */,
-				C1ACBA1E0AE21A28DF7DC747 /* MetrikWidgetExtension */,
+
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		88733CEDD227590B4F340B6A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BDDFC85D007CA5F5ED5396D6 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+
 		B862788362A66BEA8373176A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -458,26 +404,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		5E27772D94610DEB9B0FDA03 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F15FC6A0144C4CF430B6CEA9 /* DailySummary.swift in Sources */,
-				C8EE7D756E3C79BF20DA82C3 /* LocalGitConfig.swift in Sources */,
-				3A2C5AC758B0EF3176752F47 /* LocalGitService.swift in Sources */,
-				1CBA57E31E123FCCEA5C923E /* MediumWidgetView.swift in Sources */,
-				8BDE9531A15A82306446932B /* MergedCommit.swift in Sources */,
-				3DDA543639D9167166C1C464 /* MetricsCalculator.swift in Sources */,
-				AC9F3E01891D2FC5D5E415AD /* MetrikWidget.swift in Sources */,
-				9205993C868AC42186417A8B /* PersistenceController.swift in Sources */,
-				DA18512B64AC9C1444D4D57F /* Provider.swift in Sources */,
-				6ADE65BDF956CFAA750D4188 /* SmallWidgetView.swift in Sources */,
-				B191C24C92ECE3C21D4DBCA6 /* SyncService.swift in Sources */,
-				9182A1F48A28351AC3697D82 /* TrackedRepo.swift in Sources */,
-				7B5E6F47A6C888F5704AC81E /* UserSettings.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+
+
 		68DA6203D7E897C10BEFAF2E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -530,11 +458,8 @@
 			target = 798EF4C04AB4C176EC913724 /* Metrik */;
 			targetProxy = 8A44176E7E14A6933E3263D9 /* PBXContainerItemProxy */;
 		};
-		FD0FBFE21427919381EAF194 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C1ACBA1E0AE21A28DF7DC747 /* MetrikWidgetExtension */;
-			targetProxy = BC3D143EE6168813E5FB17BE /* PBXContainerItemProxy */;
-		};
+
+
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -686,52 +611,8 @@
 			};
 			name = Release;
 		};
-		4F3D37B1F8552098BA86E30F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = MetrikWidget/MetrikWidget.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				COMBINE_HIDPI_IMAGES = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				DEVELOPMENT_TEAM = MVLPZ77DT6;
-				INFOPLIST_FILE = MetrikWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MetrikWidget;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.metrik.app.widget;
-				PRODUCT_NAME = MetrikWidgetExtension;
-				SDKROOT = macosx;
-			};
-			name = Debug;
-		};
-		93DEEA639359323EDA46FEA5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = MetrikWidget/MetrikWidget.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				COMBINE_HIDPI_IMAGES = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				DEVELOPMENT_TEAM = MVLPZ77DT6;
-				INFOPLIST_FILE = MetrikWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MetrikWidget;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.metrik.app.widget;
-				PRODUCT_NAME = MetrikWidgetExtension;
-				SDKROOT = macosx;
-			};
-			name = Release;
-		};
+
+
 		A1DEF6154B9EAFF8A0085EC9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -872,15 +753,8 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		F4A1A191EE434BF9C237D203 /* Build configuration list for PBXNativeTarget "MetrikWidgetExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4F3D37B1F8552098BA86E30F /* Debug */,
-				93DEEA639359323EDA46FEA5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
+
+
 /* End XCConfigurationList section */
 	};
 	rootObject = F69E08822231BD72DC236F74 /* Project object */;

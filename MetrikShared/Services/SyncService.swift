@@ -1,6 +1,5 @@
 import Foundation
 import SwiftData
-import WidgetKit
 
 public struct SyncLogEntry: Identifiable, Sendable {
     public let id = UUID()
@@ -107,7 +106,7 @@ public final class SyncService {
                 syncError = repoErrors.joined(separator: "; ")
             }
 
-            WidgetCenter.shared.reloadAllTimelines()
+
         } catch {
             syncError = error.localizedDescription
             appendLog(repo: "global", message: error.localizedDescription, isError: true)

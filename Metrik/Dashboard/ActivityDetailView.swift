@@ -248,7 +248,7 @@ struct ActivityDetailView: View {
                   let url = LocalGitService.commitWebURL(remoteURL: remote, sha: commit.sha) else { return }
 
             await MainActor.run {
-                NSWorkspace.shared.open(url)
+                _ = NSWorkspace.shared.open(url)
             }
         }
     }
