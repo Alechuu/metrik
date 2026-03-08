@@ -303,7 +303,7 @@ struct SetupWizardView: View {
 
     private func scanRepos() {
         isScanning = true
-        Task {
+        _ = Task {
             let results = await appState.syncService.scanForRepos(rootDirectory: rootDirectory)
             scannedRepos = results.map { ScannedRepo(path: $0.path, name: $0.name, isSelected: true) }
             isScanning = false
@@ -315,7 +315,7 @@ struct SetupWizardView: View {
 
     private func detectIdentity() {
         guard let firstRepo = scannedRepos.first(where: \.isSelected) else { return }
-        Task {
+        _ = Task {
             if let identity = await appState.syncService.detectGitIdentity(repoPath: firstRepo.path) {
                 gitUserName = identity.name
                 gitUserEmail = identity.email
@@ -325,7 +325,7 @@ struct SetupWizardView: View {
 
     private func saveConfiguration() {
         isSaving = true
-        Task {
+        _ = Task {
             // Save config
             let config = LocalGitConfig(
                 rootDirectory: rootDirectory,

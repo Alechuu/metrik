@@ -66,7 +66,7 @@ struct RepoSelectionView: View {
                             repo.isTracked = newValue
                             try? modelContext.save()
                             if newValue {
-                                Task {
+                                _ = Task {
                                     await appState.syncService.sync(modelContext: modelContext)
                                     appState.refreshMetrics(modelContext: modelContext)
                                 }
@@ -107,7 +107,7 @@ struct RepoSelectionView: View {
     private func rescanRepos() {
         isScanning = true
         scanError = nil
-        Task {
+        _ = Task {
             do {
                 let configDescriptor = FetchDescriptor<LocalGitConfig>()
                 guard let config = try modelContext.fetch(configDescriptor).first else {

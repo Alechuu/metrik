@@ -109,7 +109,7 @@ struct DashboardView: View {
                 Spacer()
 
                 Button("Sync Now") {
-                    Task {
+                    _ = Task {
                         await appState.syncService.sync(modelContext: modelContext)
                         appState.refreshMetrics(modelContext: modelContext)
                     }

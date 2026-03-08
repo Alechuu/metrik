@@ -128,7 +128,7 @@ struct DebugSettingsView: View {
             // Actions
             HStack {
                 Button("Sync Now") {
-                    Task {
+                    _ = Task {
                         await appState.syncService.sync(modelContext: modelContext)
                         appState.refreshMetrics(modelContext: modelContext)
                     }
