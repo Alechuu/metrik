@@ -11,40 +11,31 @@ struct AccountSettingsView: View {
     var body: some View {
         VStack(spacing: 20) {
             if let config = config, config.isConfigured {
-                VStack(spacing: 16) {
-                    Image(systemName: "person.crop.circle.badge.checkmark")
-                        .font(.system(size: 50))
-                        .foregroundStyle(.green)
-
-                    VStack(spacing: 4) {
-                        Text(config.gitUserName)
-                            .font(.title2.bold())
-
-                        Text(config.gitUserEmail)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    VStack(spacing: 4) {
-                        Text("Projects Folder")
-                            .font(.caption.bold())
-                            .foregroundStyle(.secondary)
-                        Text(config.rootDirectory)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                    }
+                if #available(macOS 26, *) {
+                    configuredInfo(config)
+                        .padding(24)
+                        .glassEffectIfAvailable(cornerRadius: 16)
+                } else {
+                    configuredInfo(config)
                 }
 
                 Spacer()
 
-                Button(role: .destructive) {
-                    appState.resetConfiguration(modelContext: modelContext)
-                } label: {
-                    Label("Reset Configuration", systemImage: "arrow.counterclockwise")
+                if #available(macOS 26, *) {
+                    Button(role: .destructive) {
+                        appState.resetConfiguration(modelContext: modelContext)
+                    } label: {
+                        Label("Reset Configuration", systemImage: "arrow.counterclockwise")
+                    }
+                    .buttonStyle(.glass)
+                } else {
+                    Button(role: .destructive) {
+                        appState.resetConfiguration(modelContext: modelContext)
+                    } label: {
+                        Label("Reset Configuration", systemImage: "arrow.counterclockwise")
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "gearshape.circle")
@@ -61,5 +52,33 @@ struct AccountSettingsView: View {
         }
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func configuredInfo(_ config: LocalGitConfig) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "person.crop.circle.badge.checkmark")
+                .font(.system(size: 50))
+                .foregroundStyle(.green)
+
+            VStack(spacing: 4) {
+                Text(config.gitUserName)
+                    .font(.title2.bold())
+
+                Text(config.gitUserEmail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 4) {
+                Text("Projects Folder")
+                    .font(.caption.bold())
+                    .foregroundStyle(.secondary)
+                Text(config.rootDirectory)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+        }
     }
 }

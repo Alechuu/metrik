@@ -1,34 +1,42 @@
-import SwiftUI
-import SwiftData
+import AppKit
 import ServiceManagement
+import SwiftData
+import SwiftUI
 
 struct GeneralSettingsView: View {
+    private enum RequiredField: Hashable {
+        case goalValue
+        case hoursPerDay
+        case hoursPerWeek
+    }
+
     var appState: AppState
     @Environment(\.modelContext) private var modelContext
     @Query private var settingsList: [UserSettings]
+    @State private var goalValueText = ""
+    @State private var hoursPerDayText = ""
+    @State private var hoursPerWeekText = ""
+    @State private var hasLoadedDraftValues = false
+    @FocusState private var focusedField: RequiredField?
 
     private var settings: UserSettings {
         settingsList.first ?? UserSettings()
     }
 
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = .autoupdatingCurrent
+        formatter.usesGroupingSeparator = false
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+
     var body: some View {
         Form {
             Section("Coding Goal") {
-                HStack {
-                    Text("Expected lines")
-                    Spacer()
-                    TextField("", value: Binding(
-                        get: { settings.goalValue },
-                        set: { newValue in
-                            settings.goalValue = newValue
-                            try? modelContext.save()
-                            appState.refreshMetrics(modelContext: modelContext)
-                        }
-                    ), format: .number)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 80)
-                    .multilineTextAlignment(.trailing)
-                }
+                requiredNumberRow(title: "Expected lines", text: goalValueBinding, field: .goalValue)
 
                 Picker("Per", selection: Binding(
                     get: { GoalUnit(rawValue: settings.goalUnitRawValue) ?? .perWeek },
@@ -48,35 +56,8 @@ struct GeneralSettingsView: View {
             }
 
             Section("Working Hours") {
-                HStack {
-                    Text("Hours per day")
-                    Spacer()
-                    TextField("", value: Binding(
-                        get: { settings.hoursPerDay },
-                        set: { newValue in
-                            settings.hoursPerDay = newValue
-                            try? modelContext.save()
-                        }
-                    ), format: .number)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 80)
-                    .multilineTextAlignment(.trailing)
-                }
-
-                HStack {
-                    Text("Hours per week")
-                    Spacer()
-                    TextField("", value: Binding(
-                        get: { settings.hoursPerWeek },
-                        set: { newValue in
-                            settings.hoursPerWeek = newValue
-                            try? modelContext.save()
-                        }
-                    ), format: .number)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 80)
-                    .multilineTextAlignment(.trailing)
-                }
+                requiredNumberRow(title: "Hours per day", text: hoursPerDayBinding, field: .hoursPerDay)
+                requiredNumberRow(title: "Hours per week", text: hoursPerWeekBinding, field: .hoursPerWeek)
             }
 
             Section("Sync") {
@@ -109,6 +90,7 @@ struct GeneralSettingsView: View {
         .padding()
         .onAppear {
             ensureSettings()
+            loadDraftValues()
         }
     }
 
@@ -121,26 +103,41 @@ struct GeneralSettingsView: View {
         HStack(spacing: 6) {
             ForEach(Self.weekdaySymbols, id: \.id) { day in
                 let isOn = settings.workingDays.contains(day.id)
-                Button {
-                    var days = settings.workingDays
-                    if isOn { days.remove(day.id) } else { days.insert(day.id) }
-                    settings.workingDays = days
-                    try? modelContext.save()
-                } label: {
-                    Text(day.short)
-                        .font(.caption.bold())
-                        .frame(width: 36, height: 28)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(isOn ? Color.accentColor : Color.clear)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .stroke(isOn ? Color.clear : Color.secondary.opacity(0.3), lineWidth: 1)
-                        )
-                        .foregroundStyle(isOn ? .white : .secondary)
+                if #available(macOS 26, *) {
+                    if isOn {
+                        Button {
+                            toggleWorkingDay(day.id)
+                        } label: {
+                            weekdayButtonLabel(day.short)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .glassEffectIfAvailable(cornerRadius: 8)
+                    } else {
+                        Button {
+                            toggleWorkingDay(day.id)
+                        } label: {
+                            weekdayButtonLabel(day.short)
+                        }
+                        .buttonStyle(.glass)
+                        .glassEffectIfAvailable(cornerRadius: 8)
+                    }
+                } else {
+                    Button {
+                        toggleWorkingDay(day.id)
+                    } label: {
+                        weekdayButtonLabel(day.short)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .fill(isOn ? Color.accentColor : Color.clear)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .stroke(isOn ? Color.clear : Color.secondary.opacity(0.3), lineWidth: 1)
+                            )
+                            .foregroundStyle(isOn ? .white : .secondary)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .frame(maxWidth: .infinity)
@@ -151,6 +148,122 @@ struct GeneralSettingsView: View {
             modelContext.insert(UserSettings())
             try? modelContext.save()
         }
+    }
+
+    private var goalValueBinding: Binding<String> {
+        requiredNumberBinding(for: $goalValueText, keyPath: \.goalValue)
+    }
+
+    private var hoursPerDayBinding: Binding<String> {
+        requiredNumberBinding(for: $hoursPerDayText, keyPath: \.hoursPerDay)
+    }
+
+    private var hoursPerWeekBinding: Binding<String> {
+        requiredNumberBinding(for: $hoursPerWeekText, keyPath: \.hoursPerWeek)
+    }
+
+    private func requiredNumberBinding(
+        for text: Binding<String>,
+        keyPath: ReferenceWritableKeyPath<UserSettings, Double>
+    ) -> Binding<String> {
+        Binding(
+            get: { text.wrappedValue },
+            set: { newValue in
+                text.wrappedValue = newValue
+                saveRequiredNumberIfValid(newValue, keyPath: keyPath)
+            }
+        )
+    }
+
+    @ViewBuilder
+    private func requiredNumberRow(title: String, text: Binding<String>, field: RequiredField) -> some View {
+        let showsError = hasLoadedDraftValues && trimmedText(text.wrappedValue).isEmpty
+
+        HStack(alignment: .top) {
+            Text(title)
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                TextField("", text: text)
+                    .textFieldStyle(.plain)
+                    .multilineTextAlignment(.trailing)
+                    .focused($focusedField, equals: field)
+                    .frame(width: 80)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color(nsColor: .controlBackgroundColor))
+                    }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(borderColor(for: field, showsError: showsError), lineWidth: 1.5)
+                    }
+
+                if showsError {
+                    Text("Required")
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                }
+            }
+        }
+    }
+
+    private func borderColor(for field: RequiredField, showsError: Bool) -> Color {
+        if showsError {
+            return .red
+        }
+        if focusedField == field {
+            return .accentColor
+        }
+        return Color.secondary.opacity(0.2)
+    }
+
+    private func loadDraftValues() {
+        goalValueText = Self.formattedNumber(settings.goalValue)
+        hoursPerDayText = Self.formattedNumber(settings.hoursPerDay)
+        hoursPerWeekText = Self.formattedNumber(settings.hoursPerWeek)
+        hasLoadedDraftValues = true
+    }
+
+    private func saveRequiredNumberIfValid(
+        _ rawText: String,
+        keyPath: ReferenceWritableKeyPath<UserSettings, Double>
+    ) {
+        let trimmed = trimmedText(rawText)
+        guard !trimmed.isEmpty else { return }
+        guard let value = Self.numberFormatter.number(from: trimmed)?.doubleValue else { return }
+        guard settings[keyPath: keyPath] != value else { return }
+
+        settings[keyPath: keyPath] = value
+        try? modelContext.save()
+        appState.refreshMetrics(modelContext: modelContext)
+    }
+
+    private func trimmedText(_ text: String) -> String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func formattedNumber(_ value: Double) -> String {
+        numberFormatter.string(from: NSNumber(value: value)) ?? String(value)
+    }
+
+    private func weekdayButtonLabel(_ short: String) -> some View {
+        Text(short)
+            .font(.caption.bold())
+            .frame(width: 36, height: 28)
+    }
+
+    private func toggleWorkingDay(_ dayID: Int) {
+        var days = settings.workingDays
+        if days.contains(dayID) {
+            days.remove(dayID)
+        } else {
+            days.insert(dayID)
+        }
+        settings.workingDays = days
+        try? modelContext.save()
+        appState.refreshMetrics(modelContext: modelContext)
     }
 
     private func updateLaunchAtLogin(_ enabled: Bool) {

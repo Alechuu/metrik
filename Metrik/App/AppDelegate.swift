@@ -47,24 +47,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func handleOpenSettings() {
         statusBarController?.closePopover()
-
-        if settingsWindow == nil {
-            let settingsView = SettingsWindow(appState: appState)
-                .modelContainer(PersistenceController.sharedModelContainer)
-
-            let hostingController = NSHostingController(rootView: settingsView)
-
-            let window = NSWindow(contentViewController: hostingController)
-            window.title = "Metrik Settings"
-            window.setContentSize(NSSize(width: 500, height: 450))
-            window.styleMask = [.titled, .closable, .miniaturizable]
-            window.level = .floating
-            window.center()
-            settingsWindow = window
+        DispatchQueue.main.async { [weak self] in
+            self?.presentSettingsWindow()
         }
-
-        settingsWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc private func handleOpenActivityDetail() {
@@ -87,6 +72,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         activityWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func presentSettingsWindow() {
+        let settingsView = SettingsWindow(appState: appState)
+            .modelContainer(PersistenceController.sharedModelContainer)
+
+        if settingsWindow == nil {
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 500, height: 450),
+                styleMask: [.titled, .closable, .miniaturizable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "Metrik Settings"
+            window.level = .floating
+            window.isReleasedWhenClosed = false
+            window.center()
+            settingsWindow = window
+        }
+
+        if settingsWindow?.contentViewController == nil || settingsWindow?.isVisible == false {
+            settingsWindow?.contentViewController = NSHostingController(rootView: settingsView)
+        }
+
+        settingsWindow?.setContentSize(NSSize(width: 500, height: 450))
+        settingsWindow?.contentView?.layoutSubtreeIfNeeded()
+        settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 }

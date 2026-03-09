@@ -298,6 +298,10 @@ struct SetupWizardView: View {
 
         if panel.runModal() == .OK, let url = panel.url {
             rootDirectory = url.path
+            // Re-open the menu bar popover so the user sees the setup wizard again with the chosen path.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                NotificationCenter.default.post(name: .showPopover, object: nil)
+            }
         }
     }
 
