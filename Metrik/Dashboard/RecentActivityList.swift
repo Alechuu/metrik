@@ -33,7 +33,7 @@ struct RecentActivityList: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 4)
             } else {
-                ForEach(recentCommits.prefix(5), id: \.sha) { commit in
+                ForEach(recentCommits.prefix(3), id: \.sha) { commit in
                     HStack(spacing: 8) {
                         Circle()
                             .fill(.green)

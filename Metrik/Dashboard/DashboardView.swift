@@ -51,30 +51,28 @@ struct DashboardView: View {
 
             if isOffDay {
                 OffDayView()
-                    .frame(maxHeight: .infinity)
+                    .frame(height: 200)
             } else {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        MetricsSummaryView(
-                            metrics: appState.metrics,
-                            goalMetric: selectedGoalMetric
-                        )
-                            .padding(.horizontal, 16)
+                VStack(spacing: 16) {
+                    MetricsSummaryView(
+                        metrics: appState.metrics,
+                        goalMetric: selectedGoalMetric
+                    )
+                        .padding(.horizontal, 16)
 
-                        Divider()
-                            .padding(.horizontal, 16)
+                    Divider()
+                        .padding(.horizontal, 16)
 
-                        HorizontalBarChartView(repos: appState.metrics.repoBreakdown)
-                            .padding(.horizontal, 16)
+                    HorizontalBarChartView(repos: appState.metrics.repoBreakdown)
+                        .padding(.horizontal, 16)
 
-                        Divider()
-                            .padding(.horizontal, 16)
+                    Divider()
+                        .padding(.horizontal, 16)
 
-                        RecentActivityList()
-                            .padding(.horizontal, 16)
-                    }
-                    .padding(.vertical, 8)
+                    RecentActivityList()
+                        .padding(.horizontal, 16)
                 }
+                .padding(.vertical, 8)
             }
 
             Divider()
@@ -128,6 +126,11 @@ struct DashboardView: View {
             let settingsDescriptor = FetchDescriptor<UserSettings>()
             let interval = (try? modelContext.fetch(settingsDescriptor).first?.syncIntervalMinutes) ?? 15
             appState.syncService.startScheduledSync(modelContext: modelContext, intervalMinutes: interval)
+        }
+        .onChange(of: appState.syncService.isSyncing) { _, syncing in
+            if !syncing {
+                appState.refreshMetrics(modelContext: modelContext)
+            }
         }
     }
 

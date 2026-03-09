@@ -34,7 +34,7 @@ final class StatusBarController {
 
         let contentView = PopoverContentView(appState: appState)
             .modelContainer(PersistenceController.sharedModelContainer)
-            .frame(width: 360, height: 520)
+            .frame(width: 360)
 
         popover.contentViewController = NSHostingController(rootView: contentView)
 
