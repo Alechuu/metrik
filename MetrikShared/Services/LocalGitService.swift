@@ -196,7 +196,13 @@ public actor LocalGitService {
             ))
         }
 
-        return commits
+        var seenSHAs = Set<String>()
+        var seenWork = Set<String>()
+        return commits.filter {
+            guard seenSHAs.insert($0.sha).inserted else { return false }
+            let workKey = "\($0.title)|\(Int($0.date.timeIntervalSince1970))"
+            return seenWork.insert(workKey).inserted
+        }
     }
 
     private func runGit(args: [String], in directory: String) -> String? {

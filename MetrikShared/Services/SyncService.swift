@@ -96,6 +96,8 @@ public final class SyncService {
                 }
             }
 
+            try deduplicateCommits(modelContext: modelContext)
+
             // (4) Incremental daily summaries
             try aggregateDailySummaries(trackedRepos: trackedRepos, modelContext: modelContext)
 
@@ -189,12 +191,9 @@ public final class SyncService {
     ) throws {
         guard !commits.isEmpty else { return }
 
-        let repoPath = repo.localPath
-        let commitDescriptor = FetchDescriptor<MergedCommit>(
-            predicate: #Predicate { $0.repoPath == repoPath }
-        )
-        let existingCommits = try modelContext.fetch(commitDescriptor)
-        let existingBySHA = Dictionary(uniqueKeysWithValues: existingCommits.map { ($0.sha, $0) })
+        let allDescriptor = FetchDescriptor<MergedCommit>()
+        let allExisting = try modelContext.fetch(allDescriptor)
+        let existingBySHA = Dictionary(uniqueKeysWithValues: allExisting.map { ($0.sha, $0) })
 
         for commit in commits {
             if let existing = existingBySHA[commit.sha] {
@@ -212,6 +211,22 @@ public final class SyncService {
                     repoName: repo.name,
                     authorEmail: authorEmail
                 ))
+            }
+        }
+    }
+
+    private func deduplicateCommits(modelContext: ModelContext) throws {
+        let descriptor = FetchDescriptor<MergedCommit>()
+        let allCommits = try modelContext.fetch(descriptor)
+
+        var seenSHAs = Set<String>()
+        var seenWork = Set<String>()
+        for commit in allCommits {
+            let dupeSHA = !seenSHAs.insert(commit.sha).inserted
+            let workKey = "\(commit.title)|\(Int(commit.committedAt.timeIntervalSince1970))"
+            let dupeWork = !seenWork.insert(workKey).inserted
+            if dupeSHA || dupeWork {
+                modelContext.delete(commit)
             }
         }
     }
