@@ -135,16 +135,6 @@ public final class SyncService {
         await withTaskGroup(of: (Int, RepoSyncResult).self, returning: [RepoSyncResult].self) { group in
             for (index, repo) in repos.enumerated() {
                 group.addTask { [gitService] in
-                    // (3) Check if remote HEAD changed before doing a network fetch
-                    let preHeadSHA = await gitService.resolveRemoteHead(
-                        repoPath: repo.localPath,
-                        branch: repo.defaultBranch
-                    )
-
-                    if let preSHA = preHeadSHA, let lastSynced = repo.lastSyncedSHA, preSHA == lastSynced {
-                        return (index, .skipped)
-                    }
-
                     // Network fetch
                     do {
                         try await gitService.fetchOrigin(repoPath: repo.localPath)
