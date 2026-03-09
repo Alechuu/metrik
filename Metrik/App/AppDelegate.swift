@@ -26,6 +26,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             name: .openActivityDetail,
             object: nil
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleShowPopover),
+            name: .showPopover,
+            object: nil
+        )
+    }
+
+    @objc private func handleShowPopover() {
+        NSApp.activate(ignoringOtherApps: true)
+        statusBarController?.showPopover()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

@@ -6,6 +6,8 @@ extension Notification.Name {
     static let openSettings = Notification.Name("com.metrik.openSettings")
     static let openActivityDetail = Notification.Name("com.metrik.openActivityDetail")
     static let metricsDidUpdate = Notification.Name("com.metrik.metricsDidUpdate")
+    /// Re-show the menu bar popover (e.g. after a file panel closes so the user sees the setup wizard again).
+    static let showPopover = Notification.Name("com.metrik.showPopover")
 }
 
 final class StatusBarController {
