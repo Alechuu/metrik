@@ -130,6 +130,19 @@ public actor LocalGitService {
         }
     }
 
+    public func sampleRecentAuthors(repoPath: String, branch: String, limit: Int = 50) async -> [String] {
+        let result = await runGitAsync(
+            args: ["log", "origin/\(branch)", "--format=%ae", "-\(limit)"],
+            in: repoPath
+        )
+        guard result.exitCode == 0, let output = result.output else { return [] }
+        let emails = output
+            .components(separatedBy: "\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+            .filter { !$0.isEmpty }
+        return Array(Set(emails)).sorted()
+    }
+
     public func fetchMergedCommits(
         repoPath: String,
         branch: String,
@@ -210,22 +223,31 @@ public actor LocalGitService {
         return result.exitCode == 0 ? result.output : nil
     }
 
+    private static let processTimeout: TimeInterval = 60
+
     private func runGitSync(args: [String], in directory: String) -> (output: String?, exitCode: Int32) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
         process.arguments = args
         process.currentDirectoryURL = URL(fileURLWithPath: directory)
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
+        let stdoutPipe = Pipe()
+        let stderrPipe = Pipe()
+        process.standardOutput = stdoutPipe
+        process.standardError = stderrPipe
 
         do {
             try process.run()
+
+            let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+
             process.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: data, encoding: .utf8)
-            return (output, process.terminationStatus)
+
+            let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
+            let stderr = String(data: stderrData, encoding: .utf8) ?? ""
+            let combined = stdout.isEmpty ? stderr : stdout
+            return (combined, process.terminationStatus)
         } catch {
             return (nil, -1)
         }
@@ -239,18 +261,44 @@ public actor LocalGitService {
                 process.arguments = args
                 process.currentDirectoryURL = URL(fileURLWithPath: directory)
 
-                let pipe = Pipe()
-                process.standardOutput = pipe
-                process.standardError = pipe
+                let stdoutPipe = Pipe()
+                let stderrPipe = Pipe()
+                process.standardOutput = stdoutPipe
+                process.standardError = stderrPipe
+
+                var didResume = false
+                let resumeOnce: ((String?, Int32)) -> Void = { result in
+                    guard !didResume else { return }
+                    didResume = true
+                    continuation.resume(returning: result)
+                }
+
+                let timer = DispatchSource.makeTimerSource(queue: .global())
+                timer.schedule(deadline: .now() + Self.processTimeout)
+                timer.setEventHandler {
+                    if process.isRunning {
+                        process.terminate()
+                    }
+                    resumeOnce(("Git process timed out after \(Int(Self.processTimeout))s", -2))
+                }
+                timer.resume()
 
                 do {
                     try process.run()
+
+                    let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+                    let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+
                     process.waitUntilExit()
-                    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                    let output = String(data: data, encoding: .utf8)
-                    continuation.resume(returning: (output, process.terminationStatus))
+                    timer.cancel()
+
+                    let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
+                    let stderr = String(data: stderrData, encoding: .utf8) ?? ""
+                    let combined = stdout.isEmpty ? stderr : stdout
+                    resumeOnce((combined, process.terminationStatus))
                 } catch {
-                    continuation.resume(returning: (nil, -1))
+                    timer.cancel()
+                    resumeOnce((nil, -1))
                 }
             }
         }
