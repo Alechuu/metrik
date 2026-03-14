@@ -62,15 +62,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let hostingView = NSHostingView(rootView: activityView)
 
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 700, height: 600),
-                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 820),
+                styleMask: [.titled, .closable, .miniaturizable, .resizable],
                 backing: .buffered,
                 defer: false
             )
             window.title = "Activity"
             window.minSize = NSSize(width: 500, height: 400)
             window.titlebarAppearsTransparent = true
-            window.titleVisibility = .hidden
 
             // Translucent blur background — same look as the menu popover
             let visualEffect = NSVisualEffectView()
@@ -85,8 +84,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             visualEffect.addSubview(hostingView)
             window.contentView = visualEffect
 
+            window.isReleasedWhenClosed = false
             window.center()
             activityWindow = window
+
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.willCloseNotification,
+                object: window,
+                queue: .main
+            ) { [weak self] _ in
+                self?.activityWindow = nil
+            }
         }
 
         activityWindow?.makeKeyAndOrderFront(nil)

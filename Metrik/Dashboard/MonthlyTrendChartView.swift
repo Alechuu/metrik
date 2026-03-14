@@ -1,5 +1,63 @@
 import SwiftUI
 
+enum ChartMetric: String, CaseIterable {
+    case linesPerHour = "Lines / Hour"
+    case linesAdded = "Lines Added"
+    case linesRemoved = "Lines Removed"
+    case commitsMerged = "Commits Merged"
+
+    var unit: String {
+        switch self {
+        case .linesPerHour: return "/hr"
+        case .linesAdded, .linesRemoved: return ""
+        case .commitsMerged: return ""
+        }
+    }
+
+    func value(for point: MonthlyDataPoint) -> Double {
+        switch self {
+        case .linesPerHour: return point.linesPerHour
+        case .linesAdded: return Double(point.additions)
+        case .linesRemoved: return Double(point.deletions)
+        case .commitsMerged: return Double(point.commitCount)
+        }
+    }
+
+    func currentValue(from data: MonthlyTrendData) -> Double {
+        switch self {
+        case .linesPerHour: return data.currentMonthLPH
+        case .linesAdded: return Double(data.currentMonthAdditions)
+        case .linesRemoved: return Double(data.currentMonthDeletions)
+        case .commitsMerged: return Double(data.currentMonthCommits)
+        }
+    }
+
+    func previousValue(from data: MonthlyTrendData) -> Double {
+        switch self {
+        case .linesPerHour: return data.previousMonthLPH
+        case .linesAdded: return Double(data.previousMonthAdditions)
+        case .linesRemoved: return Double(data.previousMonthDeletions)
+        case .commitsMerged: return Double(data.previousMonthCommits)
+        }
+    }
+
+    func formatValue(_ v: Double) -> String {
+        switch self {
+        case .linesPerHour: return String(format: "%.1f", v)
+        case .linesAdded, .linesRemoved, .commitsMerged: return String(Int(v))
+        }
+    }
+
+    func formatFooter(_ v: Double) -> String {
+        switch self {
+        case .linesPerHour: return String(format: "%.1f/hr", v)
+        case .linesAdded: return "+\(Int(v))"
+        case .linesRemoved: return "-\(Int(v))"
+        case .commitsMerged: return "\(Int(v))"
+        }
+    }
+}
+
 struct MonthlyTrendChartView: View {
     let trendData: MonthlyTrendData
     @Binding var monthCount: Int
@@ -8,10 +66,11 @@ struct MonthlyTrendChartView: View {
     let gitUserName: String
     let gitUserEmail: String
     @State private var hoveredBarId: String?
+    @State private var selectedMetric: ChartMetric = .linesPerHour
 
     // Round max up to a clean axis ceiling
     private var yMax: Double {
-        let m = trendData.dataPoints.map(\.linesPerHour).max() ?? 0
+        let m = trendData.dataPoints.map { selectedMetric.value(for: $0) }.max() ?? 0
         guard m > 0 else { return 150 }
         let steps: [Double] = [30, 50, 60, 90, 100, 120, 150, 200, 300, 500, 1000]
         return steps.first { $0 >= m * 1.15 } ?? (ceil(m * 1.15 / 50) * 50)
@@ -52,9 +111,11 @@ struct MonthlyTrendChartView: View {
                 .fill(Color.white.opacity(0.08))
                 .frame(height: 1)
             HStack {
-                Text("Lines / Hour")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color.mkTextSecondary)
+                mkMenu(icon: "chart.bar", label: selectedMetric.rawValue) {
+                    ForEach(ChartMetric.allCases, id: \.self) { metric in
+                        Button(metric.rawValue) { selectedMetric = metric }
+                    }
+                }
                 Spacer()
                 HStack(spacing: 8) {
                     mkMenu(icon: "arrow.triangle.branch", label: selectedRepoName ?? "All Repos") {
@@ -113,6 +174,7 @@ struct MonthlyTrendChartView: View {
         .frame(height: 260)
         .animation(.easeInOut(duration: 0.3), value: monthCount)
         .animation(.easeInOut(duration: 0.3), value: selectedRepoName)
+        .animation(.easeInOut(duration: 0.3), value: selectedMetric)
     }
 
     private var yAxisColumn: some View {
@@ -148,15 +210,15 @@ struct MonthlyTrendChartView: View {
 
     @ViewBuilder
     private func barColumn(point: MonthlyDataPoint, isCurrent: Bool) -> some View {
-        // 220pt for bars, leaving ~40pt headroom for value labels + x-labels
-        let barH: CGFloat = yMax > 0 && point.linesPerHour > 0
-            ? max(CGFloat(point.linesPerHour / yMax) * 220, 6)
+        let value = selectedMetric.value(for: point)
+        let barH: CGFloat = yMax > 0 && value > 0
+            ? max(CGFloat(value / yMax) * 220, 6)
             : 0
 
         VStack(spacing: 4) {
             Spacer(minLength: 0)
-            if point.linesPerHour > 0 {
-                Text(String(format: "%.1f", point.linesPerHour))
+            if value > 0 {
+                Text(selectedMetric.formatValue(value))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(isCurrent ? Color.mkAccent : Color.mkTextSecondary)
                     .opacity(hoveredBarId == point.id ? 1 : 0)
@@ -188,18 +250,22 @@ struct MonthlyTrendChartView: View {
     // MARK: – Metrics Footer
 
     private var metricsRow: some View {
-        HStack(alignment: .center) {
+        let current = selectedMetric.currentValue(from: trendData)
+        let previous = selectedMetric.previousValue(from: trendData)
+        let pct: Double? = previous > 0 ? ((current - previous) / previous) * 100 : nil
+
+        return HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("THIS MONTH (MTD)")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color.mkTextTertiary)
                     .tracking(1)
-                Text(String(format: "%.1f/hr", trendData.currentMonthLPH))
+                Text(selectedMetric.formatFooter(current))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Color.mkTextPrimary)
             }
             Spacer()
-            if let pct = trendData.percentageChange {
+            if let pct {
                 let positive = pct >= 0
                 HStack(spacing: 8) {
                     HStack(spacing: 4) {
