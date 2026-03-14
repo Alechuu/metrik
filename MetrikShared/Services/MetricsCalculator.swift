@@ -114,6 +114,37 @@ public struct MetricsCalculator {
         )
     }
 
+    /// Calculates working hours between two arbitrary dates.
+    public func calculateWorkingHours(
+        start: Date,
+        end: Date,
+        hoursPerDay: Double,
+        workingDays: Set<Int>
+    ) -> Double {
+        let calendar = Calendar.current
+        let clampedEnd = min(end, Date())
+        guard clampedEnd > start else { return 1 }
+
+        var totalHours: Double = 0
+        var current = calendar.startOfDay(for: start)
+        let dayEnd = calendar.startOfDay(for: clampedEnd)
+
+        while current < dayEnd {
+            let wd = calendar.component(.weekday, from: current)
+            if workingDays.contains(wd) { totalHours += hoursPerDay }
+            current = calendar.date(byAdding: .day, value: 1, to: current)!
+        }
+
+        let endWeekday = calendar.component(.weekday, from: clampedEnd)
+        if workingDays.contains(endWeekday) {
+            let startOfEndDay = calendar.startOfDay(for: clampedEnd)
+            let elapsed = clampedEnd.timeIntervalSince(startOfEndDay) / 3600
+            totalHours += min(elapsed, hoursPerDay)
+        }
+
+        return max(totalHours, 1)
+    }
+
     private func calculateWorkingHours(
         timeRange: TimeRange,
         hoursPerDay: Double,

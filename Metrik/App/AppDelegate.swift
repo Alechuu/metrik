@@ -59,14 +59,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let activityView = ActivityDetailView(appState: appState)
                 .modelContainer(PersistenceController.sharedModelContainer)
 
-            let hostingController = NSHostingController(rootView: activityView)
+            let hostingView = NSHostingView(rootView: activityView)
 
-            let window = NSWindow(contentViewController: hostingController)
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 600),
+                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+                backing: .buffered,
+                defer: false
+            )
             window.title = "Activity"
-            window.setContentSize(NSSize(width: 700, height: 600))
-            window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             window.minSize = NSSize(width: 500, height: 400)
-            window.level = .floating
+            window.titlebarAppearsTransparent = true
+            window.titleVisibility = .hidden
+
+            // Translucent blur background — same look as the menu popover
+            let visualEffect = NSVisualEffectView()
+            visualEffect.material = .popover
+            visualEffect.blendingMode = .behindWindow
+            visualEffect.state = .active
+            visualEffect.autoresizingMask = [.width, .height]
+
+            hostingView.autoresizingMask = [.width, .height]
+            hostingView.frame = visualEffect.bounds
+
+            visualEffect.addSubview(hostingView)
+            window.contentView = visualEffect
+
             window.center()
             activityWindow = window
         }
@@ -87,7 +105,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 defer: false
             )
             window.title = "Metrik Settings"
-            window.level = .floating
             window.isReleasedWhenClosed = false
             window.center()
             settingsWindow = window
