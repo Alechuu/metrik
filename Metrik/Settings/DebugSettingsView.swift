@@ -111,6 +111,7 @@ struct DebugSettingsView: View {
                         .font(.caption.bold())
                         .foregroundStyle(.secondary)
                     Spacer()
+                    #if compiler(>=6.2)
                     if #available(macOS 26, *) {
                         Button("Clear") {
                             appState.syncService.clearLog()
@@ -119,13 +120,11 @@ struct DebugSettingsView: View {
                         .buttonStyle(.glass)
                         .disabled(appState.syncService.syncLog.isEmpty)
                     } else {
-                        Button("Clear") {
-                            appState.syncService.clearLog()
-                        }
-                        .font(.caption)
-                        .buttonStyle(.borderless)
-                        .disabled(appState.syncService.syncLog.isEmpty)
+                        clearLogButton
                     }
+                    #else
+                    clearLogButton
+                    #endif
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -171,6 +170,7 @@ struct DebugSettingsView: View {
 
             // Actions
             HStack {
+                #if compiler(>=6.2)
                 if #available(macOS 26, *) {
                     Button("Sync Now") {
                         _ = Task {
@@ -181,14 +181,11 @@ struct DebugSettingsView: View {
                     .buttonStyle(.glass)
                     .disabled(appState.syncService.isSyncing)
                 } else {
-                    Button("Sync Now") {
-                        _ = Task {
-                            await appState.syncService.sync(modelContext: modelContext)
-                            appState.refreshMetrics(modelContext: modelContext)
-                        }
-                    }
-                    .disabled(appState.syncService.isSyncing)
+                    syncNowButton
                 }
+                #else
+                syncNowButton
+                #endif
 
                 if appState.syncService.isSyncing {
                     ProgressView()
@@ -200,6 +197,25 @@ struct DebugSettingsView: View {
             .padding(.horizontal)
             .padding(.vertical, 8)
         }
+    }
+
+    private var clearLogButton: some View {
+        Button("Clear") {
+            appState.syncService.clearLog()
+        }
+        .font(.caption)
+        .buttonStyle(.borderless)
+        .disabled(appState.syncService.syncLog.isEmpty)
+    }
+
+    private var syncNowButton: some View {
+        Button("Sync Now") {
+            _ = Task {
+                await appState.syncService.sync(modelContext: modelContext)
+                appState.refreshMetrics(modelContext: modelContext)
+            }
+        }
+        .disabled(appState.syncService.isSyncing)
     }
 
     @ViewBuilder

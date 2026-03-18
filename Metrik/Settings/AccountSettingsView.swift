@@ -23,6 +23,7 @@ struct AccountSettingsView: View {
 
                 Spacer()
 
+                #if compiler(>=6.2)
                 if #available(macOS 26, *) {
                     Button(role: .destructive) {
                         appState.resetConfiguration(modelContext: modelContext)
@@ -31,13 +32,11 @@ struct AccountSettingsView: View {
                     }
                     .buttonStyle(.glass)
                 } else {
-                    Button(role: .destructive) {
-                        appState.resetConfiguration(modelContext: modelContext)
-                    } label: {
-                        Label("Reset Configuration", systemImage: "arrow.counterclockwise")
-                    }
-                    .buttonStyle(.bordered)
+                    resetButton
                 }
+                #else
+                resetButton
+                #endif
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "gearshape.circle")
@@ -54,6 +53,15 @@ struct AccountSettingsView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var resetButton: some View {
+        Button(role: .destructive) {
+            appState.resetConfiguration(modelContext: modelContext)
+        } label: {
+            Label("Reset Configuration", systemImage: "arrow.counterclockwise")
+        }
+        .buttonStyle(.bordered)
     }
 
     private func configuredInfo(_ config: LocalGitConfig) -> some View {

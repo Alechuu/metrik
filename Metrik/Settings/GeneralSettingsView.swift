@@ -104,6 +104,7 @@ struct GeneralSettingsView: View {
         HStack(spacing: 6) {
             ForEach(Self.weekdaySymbols, id: \.id) { day in
                 let isOn = settings.workingDays.contains(day.id)
+                #if compiler(>=6.2)
                 if #available(macOS 26, *) {
                     if isOn {
                         Button {
@@ -123,22 +124,11 @@ struct GeneralSettingsView: View {
                         .glassEffectIfAvailable(cornerRadius: 8)
                     }
                 } else {
-                    Button {
-                        toggleWorkingDay(day.id)
-                    } label: {
-                        weekdayButtonLabel(day.short)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .fill(isOn ? Color.accentColor : Color.clear)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .stroke(isOn ? Color.clear : Color.secondary.opacity(0.3), lineWidth: 1)
-                            )
-                            .foregroundStyle(isOn ? .white : .secondary)
-                    }
-                    .buttonStyle(.plain)
+                    weekdayFallbackButton(day: day, isOn: isOn)
                 }
+                #else
+                weekdayFallbackButton(day: day, isOn: isOn)
+                #endif
             }
         }
         .frame(maxWidth: .infinity)
@@ -247,6 +237,24 @@ struct GeneralSettingsView: View {
 
     private static func formattedNumber(_ value: Double) -> String {
         numberFormatter.string(from: NSNumber(value: value)) ?? String(value)
+    }
+
+    private func weekdayFallbackButton(day: (id: Int, short: String), isOn: Bool) -> some View {
+        Button {
+            toggleWorkingDay(day.id)
+        } label: {
+            weekdayButtonLabel(day.short)
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(isOn ? Color.accentColor : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .stroke(isOn ? Color.clear : Color.secondary.opacity(0.3), lineWidth: 1)
+                )
+                .foregroundStyle(isOn ? .white : .secondary)
+        }
+        .buttonStyle(.plain)
     }
 
     private func weekdayButtonLabel(_ short: String) -> some View {

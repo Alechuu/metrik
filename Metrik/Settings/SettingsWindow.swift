@@ -104,10 +104,14 @@ struct SettingsWindow: View {
 extension View {
     @ViewBuilder
     func glassEffectIfAvailable(cornerRadius: CGFloat) -> some View {
+        #if compiler(>=6.2)
         if #available(macOS 26, *) {
             self.glassEffect(in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         } else {
             self
         }
+        #else
+        self
+        #endif
     }
 }

@@ -21,6 +21,7 @@ struct RepoSelectionView: View {
                 TextField("Search repositories...", text: $searchText)
                     .textFieldStyle(.roundedBorder)
 
+                #if compiler(>=6.2)
                 if #available(macOS 26, *) {
                     Button {
                         rescanRepos()
@@ -35,18 +36,11 @@ struct RepoSelectionView: View {
                     .buttonStyle(.glass)
                     .disabled(isScanning)
                 } else {
-                    Button {
-                        rescanRepos()
-                    } label: {
-                        if isScanning {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                    }
-                    .disabled(isScanning)
+                    rescanButton
                 }
+                #else
+                rescanButton
+                #endif
             }
             .padding()
 
@@ -68,17 +62,18 @@ struct RepoSelectionView: View {
                     Text("No repositories found")
                         .font(.headline)
                         .foregroundStyle(.secondary)
+                    #if compiler(>=6.2)
                     if #available(macOS 26, *) {
                         Button("Scan for Repositories") {
                             rescanRepos()
                         }
                         .buttonStyle(.glass)
                     } else {
-                        Button("Scan for Repositories") {
-                            rescanRepos()
-                        }
-                        .buttonStyle(.borderedProminent)
+                        scanButton
                     }
+                    #else
+                    scanButton
+                    #endif
                 }
                 .frame(maxHeight: .infinity)
             } else {
@@ -117,6 +112,7 @@ struct RepoSelectionView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
+                #if compiler(>=6.2)
                 if #available(macOS 26, *) {
                     Button {
                         addReposManually()
@@ -126,14 +122,11 @@ struct RepoSelectionView: View {
                     }
                     .buttonStyle(.glass)
                 } else {
-                    Button {
-                        addReposManually()
-                    } label: {
-                        Label("Add Repositories", systemImage: "plus")
-                            .font(.caption)
-                    }
-                    .buttonStyle(.borderless)
+                    addReposButton
                 }
+                #else
+                addReposButton
+                #endif
             }
             .padding(.horizontal)
             .padding(.vertical, 6)
@@ -143,6 +136,37 @@ struct RepoSelectionView: View {
                 rescanRepos()
             }
         }
+    }
+
+    private var rescanButton: some View {
+        Button {
+            rescanRepos()
+        } label: {
+            if isScanning {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Image(systemName: "arrow.clockwise")
+            }
+        }
+        .disabled(isScanning)
+    }
+
+    private var scanButton: some View {
+        Button("Scan for Repositories") {
+            rescanRepos()
+        }
+        .buttonStyle(.borderedProminent)
+    }
+
+    private var addReposButton: some View {
+        Button {
+            addReposManually()
+        } label: {
+            Label("Add Repositories", systemImage: "plus")
+                .font(.caption)
+        }
+        .buttonStyle(.borderless)
     }
 
     private func addReposManually() {
