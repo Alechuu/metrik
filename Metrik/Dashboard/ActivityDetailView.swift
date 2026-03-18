@@ -27,6 +27,7 @@ struct ActivityDetailView: View {
     @Query(sort: \MergedCommit.committedAt, order: .reverse) private var commits: [MergedCommit]
     @Query private var userSettingsList: [UserSettings]
     @Query private var gitConfigs: [LocalGitConfig]
+    @Query(sort: \TrackedRepo.localPath) private var trackedRepos: [TrackedRepo]
 
     @State private var remoteURLCache: [String: String] = [:]
     @State private var timeFilter: ActivityTimeFilter = .preset(.thisWeek)
@@ -36,6 +37,7 @@ struct ActivityDetailView: View {
     @State private var trendMonthCount: Int = 6
     @State private var currentPage: Int = 0
     @State private var pageSize: Int = 5
+    @State private var showCustomRangeSheet = false
     private let gitService = LocalGitService()
     private let trendCalculator = MonthlyTrendCalculator()
 
@@ -87,13 +89,14 @@ struct ActivityDetailView: View {
                     selectedRepoName: $selectedRepoName,
                     availableRepos: availableRepos,
                     gitUserName: gitUserName,
-                    gitUserEmail: gitUserEmail
+                    gitUserEmail: gitUserEmail,
+                    customAvatarData: gitConfigs.first?.customAvatarData
                 )
                 activityCard
             }
             .padding(24)
         }
-        .frame(minWidth: 520, minHeight: 580)
+        .frame(minWidth: 520)
         .preferredColorScheme(.dark)
         .onAppear { timeFilter = .preset(appState.selectedTimeRange) }
     }
@@ -104,7 +107,7 @@ struct ActivityDetailView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Card header
             HStack(alignment: .center) {
-                Text("Recent Activity")
+                Text(selectedRepoName.map { "Activity — \($0)" } ?? "Activity")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Color.mkTextPrimary)
                 Spacer()
@@ -114,7 +117,7 @@ struct ActivityDetailView: View {
                     Button("This Month") { timeFilter = .preset(.thisMonth) }
                     Button("All Time") { timeFilter = .preset(.allTime) }
                     Divider()
-                    Button("Custom Range...") { timeFilter = .custom(start: customStartDate, end: customEndDate) }
+                    Button("Custom Range...") { showCustomRangeSheet = true }
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "calendar")
@@ -138,20 +141,6 @@ struct ActivityDetailView: View {
                 .fixedSize()
             }
             .padding(.bottom, 12)
-
-            // Custom date range row
-            if case .custom = timeFilter {
-                HStack(spacing: 12) {
-                    DatePicker("From", selection: $customStartDate, displayedComponents: .date)
-                        .labelsHidden()
-                    DatePicker("To", selection: $customEndDate, displayedComponents: .date)
-                        .labelsHidden()
-                    Spacer()
-                }
-                .padding(.bottom, 12)
-                .onChange(of: customStartDate) { _, v in timeFilter = .custom(start: v, end: customEndDate) }
-                .onChange(of: customEndDate) { _, v in timeFilter = .custom(start: customStartDate, end: v) }
-            }
 
             // Commit list or empty state
             if filteredCommits.isEmpty {
@@ -216,6 +205,14 @@ struct ActivityDetailView: View {
         .background(Color.black.opacity(0.35))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.15), lineWidth: 0.5))
+        .sheet(isPresented: $showCustomRangeSheet) {
+            CustomRangeSheet(
+                startDate: $customStartDate,
+                endDate: $customEndDate
+            ) {
+                timeFilter = .custom(start: customStartDate, end: customEndDate)
+            }
+        }
     }
 
     // MARK: – Empty State
@@ -368,5 +365,358 @@ struct ActivityDetailView: View {
         if let url = LocalGitService.commitWebURL(remoteURL: remoteURL, sha: commit.sha) {
             NSWorkspace.shared.open(url)
         }
+    }
+}
+
+// MARK: – Custom Range Sheet
+
+private struct CustomRangeSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var startDate: Date
+    @Binding var endDate: Date
+    var onApply: () -> Void
+
+    @State private var draftStart: Date
+    @State private var draftEnd: Date
+    @State private var displayedMonth: Date
+    @State private var selectingEnd = false
+
+    private let calendar = Calendar.current
+    private let weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+    private static let monthYearFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMMM yyyy"
+        return f
+    }()
+    private static let shortDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMM d, yyyy"
+        return f
+    }()
+
+    init(startDate: Binding<Date>, endDate: Binding<Date>, onApply: @escaping () -> Void) {
+        _startDate = startDate
+        _endDate = endDate
+        self.onApply = onApply
+        _draftStart = State(initialValue: startDate.wrappedValue)
+        _draftEnd = State(initialValue: endDate.wrappedValue)
+        _displayedMonth = State(initialValue: startDate.wrappedValue)
+    }
+
+    private var isValid: Bool {
+        calendar.startOfDay(for: draftStart) <= calendar.startOfDay(for: draftEnd)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            header
+            separator
+            rangePills
+            separator
+            monthNavigation
+            weekdayHeader
+            calendarGrid
+            separator
+            footer
+        }
+        .frame(width: 340)
+        .background(Color.mkBgCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .preferredColorScheme(.dark)
+    }
+
+    // MARK: – Header
+
+    private var header: some View {
+        HStack {
+            Text("Custom Range")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.mkTextPrimary)
+            Spacer()
+            Button { dismiss() } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.mkTextMuted)
+            }
+            .buttonStyle(.borderless)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 14)
+    }
+
+    // MARK: – Range Pills
+
+    private var rangePills: some View {
+        HStack(spacing: 10) {
+            rangePill(
+                label: "From",
+                date: draftStart,
+                isActive: !selectingEnd
+            ) {
+                selectingEnd = false
+                displayedMonth = draftStart
+            }
+            Image(systemName: "arrow.right")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Color.mkTextMuted)
+            rangePill(
+                label: "To",
+                date: draftEnd,
+                isActive: selectingEnd
+            ) {
+                selectingEnd = true
+                displayedMonth = draftEnd
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+    }
+
+    private func rangePill(label: String, date: Date, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(label.uppercased())
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(isActive ? Color.mkAccent : Color.mkTextMuted)
+                    .tracking(0.8)
+                Text(Self.shortDateFormatter.string(from: date))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Color.mkTextPrimary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(isActive ? Color.mkAccent.opacity(0.1) : Color.white.opacity(0.04))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isActive ? Color.mkAccent.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.borderless)
+    }
+
+    // MARK: – Month Navigation
+
+    private var monthNavigation: some View {
+        HStack {
+            Button { shiftMonth(-1) } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.mkTextSecondary)
+                    .frame(width: 30, height: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.borderless)
+
+            Spacer()
+            Text(Self.monthYearFormatter.string(from: displayedMonth))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.mkTextPrimary)
+            Spacer()
+
+            Button { shiftMonth(1) } label: {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.mkTextSecondary)
+                    .frame(width: 30, height: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.borderless)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var weekdayHeader: some View {
+        HStack(spacing: 0) {
+            ForEach(weekdays, id: \.self) { day in
+                Text(day)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.mkTextMuted)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 6)
+    }
+
+    // MARK: – Calendar Grid
+
+    private var calendarGrid: some View {
+        let days = calendarDays()
+        let rows = stride(from: 0, to: days.count, by: 7).map { Array(days[$0..<min($0 + 7, days.count)]) }
+
+        return VStack(spacing: 2) {
+            ForEach(Array(rows.enumerated()), id: \.0) { _, row in
+                HStack(spacing: 0) {
+                    ForEach(Array(row.enumerated()), id: \.0) { _, day in
+                        dayCell(day)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+    }
+
+    @ViewBuilder
+    private func dayCell(_ day: CalendarDay) -> some View {
+        let isStart = calendar.isDate(day.date, inSameDayAs: draftStart)
+        let isEnd = calendar.isDate(day.date, inSameDayAs: draftEnd)
+        let isInRange = day.date >= calendar.startOfDay(for: draftStart)
+            && day.date <= calendar.startOfDay(for: draftEnd)
+            && day.isCurrentMonth
+        let isToday = calendar.isDateInToday(day.date) && day.isCurrentMonth
+        let isEdge = (isStart || isEnd) && day.isCurrentMonth
+
+        Button {
+            guard day.isCurrentMonth else { return }
+            selectDate(day.date)
+        } label: {
+            Text("\(calendar.component(.day, from: day.date))")
+                .font(.system(size: 13, weight: isEdge ? .bold : isToday ? .semibold : .regular))
+                .foregroundStyle(
+                    isEdge ? .white :
+                    !day.isCurrentMonth ? Color.mkTextMuted.opacity(0.4) :
+                    isInRange ? Color.mkAccent :
+                    isToday ? Color.mkAccent :
+                    Color.mkTextPrimary
+                )
+                .frame(maxWidth: .infinity)
+                .frame(height: 34)
+                .background(
+                    Group {
+                        if isEdge {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.mkAccent)
+                        } else if isInRange {
+                            Rectangle()
+                                .fill(Color.mkAccent.opacity(0.1))
+                        }
+                    }
+                )
+        }
+        .buttonStyle(.borderless)
+        .disabled(!day.isCurrentMonth)
+    }
+
+    // MARK: – Footer
+
+    private var footer: some View {
+        HStack(spacing: 10) {
+            if !isValid {
+                HStack(spacing: 5) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 10))
+                    Text("Invalid range")
+                        .font(.system(size: 11))
+                }
+                .foregroundStyle(Color.mkNegative)
+            }
+            Spacer()
+            Button("Cancel") { dismiss() }
+                .font(.system(size: 13, weight: .medium))
+                .buttonStyle(.borderless)
+                .foregroundStyle(Color.mkTextSecondary)
+
+            Button {
+                startDate = draftStart
+                endDate = draftEnd
+                onApply()
+                dismiss()
+            } label: {
+                Text("Apply")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(Color.mkAccent)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.borderless)
+            .disabled(!isValid)
+            .opacity(isValid ? 1 : 0.5)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+    }
+
+    // MARK: – Helpers
+
+    private var separator: some View {
+        Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
+    }
+
+    private func shiftMonth(_ delta: Int) {
+        if let next = calendar.date(byAdding: .month, value: delta, to: displayedMonth) {
+            withAnimation(.easeInOut(duration: 0.2)) { displayedMonth = next }
+        }
+    }
+
+    private func selectDate(_ date: Date) {
+        let day = calendar.startOfDay(for: date)
+        if !selectingEnd {
+            draftStart = day
+            if day > calendar.startOfDay(for: draftEnd) {
+                draftEnd = day
+            }
+            selectingEnd = true
+        } else {
+            if day < calendar.startOfDay(for: draftStart) {
+                draftStart = day
+            } else {
+                draftEnd = day
+            }
+            selectingEnd = false
+        }
+    }
+
+    private struct CalendarDay {
+        let date: Date
+        let isCurrentMonth: Bool
+    }
+
+    private func calendarDays() -> [CalendarDay] {
+        let comps = calendar.dateComponents([.year, .month], from: displayedMonth)
+        guard let firstOfMonth = calendar.date(from: comps),
+              let range = calendar.range(of: .day, in: .month, for: firstOfMonth) else { return [] }
+
+        // Monday = 1 offset. Calendar weekday: Sun=1 Mon=2 ... Sat=7
+        let firstWeekday = calendar.component(.weekday, from: firstOfMonth)
+        let leadingBlanks = (firstWeekday + 5) % 7  // Mon-based offset
+
+        var days: [CalendarDay] = []
+
+        // Leading days from previous month
+        for i in (0..<leadingBlanks).reversed() {
+            if let date = calendar.date(byAdding: .day, value: -(i + 1), to: firstOfMonth) {
+                days.append(CalendarDay(date: date, isCurrentMonth: false))
+            }
+        }
+
+        // Current month days
+        for day in range {
+            if let date = calendar.date(byAdding: .day, value: day - 1, to: firstOfMonth) {
+                days.append(CalendarDay(date: date, isCurrentMonth: true))
+            }
+        }
+
+        // Trailing days to fill last row
+        let remainder = days.count % 7
+        if remainder > 0 {
+            let trailing = 7 - remainder
+            if let lastOfMonth = calendar.date(byAdding: .day, value: range.count - 1, to: firstOfMonth) {
+                for i in 1...trailing {
+                    if let date = calendar.date(byAdding: .day, value: i, to: lastOfMonth) {
+                        days.append(CalendarDay(date: date, isCurrentMonth: false))
+                    }
+                }
+            }
+        }
+
+        return days
     }
 }

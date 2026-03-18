@@ -61,8 +61,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
             let hostingView = NSHostingView(rootView: activityView)
 
+            let targetWidth: CGFloat = 700
+            let fittingSize = hostingView.fittingSize
+            let contentHeight = max(fittingSize.height, 400)
+
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 700, height: 820),
+                contentRect: NSRect(x: 0, y: 0, width: targetWidth, height: contentHeight),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable],
                 backing: .buffered,
                 defer: false
@@ -102,28 +106,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func presentSettingsWindow() {
-        let settingsView = SettingsWindow(appState: appState)
-            .modelContainer(PersistenceController.sharedModelContainer)
-
         if settingsWindow == nil {
+            let settingsView = SettingsWindow(appState: appState)
+                .modelContainer(PersistenceController.sharedModelContainer)
+
+            let hostingView = NSHostingView(rootView: settingsView)
+
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 500, height: 450),
+                contentRect: NSRect(x: 0, y: 0, width: 680, height: 660),
                 styleMask: [.titled, .closable, .miniaturizable],
                 backing: .buffered,
                 defer: false
             )
             window.title = "Metrik Settings"
+            window.titlebarAppearsTransparent = true
             window.isReleasedWhenClosed = false
+
+            let visualEffect = NSVisualEffectView()
+            visualEffect.material = .popover
+            visualEffect.blendingMode = .behindWindow
+            visualEffect.state = .active
+            visualEffect.autoresizingMask = [.width, .height]
+
+            hostingView.autoresizingMask = [.width, .height]
+            hostingView.frame = visualEffect.bounds
+
+            visualEffect.addSubview(hostingView)
+            window.contentView = visualEffect
+
             window.center()
             settingsWindow = window
+
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.willCloseNotification,
+                object: window,
+                queue: .main
+            ) { [weak self] _ in
+                self?.settingsWindow = nil
+            }
         }
 
-        if settingsWindow?.contentViewController == nil || settingsWindow?.isVisible == false {
-            settingsWindow?.contentViewController = NSHostingController(rootView: settingsView)
-        }
-
-        settingsWindow?.setContentSize(NSSize(width: 500, height: 450))
-        settingsWindow?.contentView?.layoutSubtreeIfNeeded()
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }

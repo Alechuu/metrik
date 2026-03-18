@@ -49,7 +49,6 @@ struct RepoSelectionView: View {
                 }
             }
             .padding()
-            .glassEffectIfAvailable(cornerRadius: 10)
 
             if let error = scanError {
                 HStack {
@@ -108,6 +107,7 @@ struct RepoSelectionView: View {
                         }
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
 
             Divider()

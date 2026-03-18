@@ -96,6 +96,7 @@ struct DebugSettingsView: View {
                         }
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
             .task {
                 await loadRepoEmails()
@@ -162,6 +163,7 @@ struct DebugSettingsView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
+                    .scrollContentBackground(.hidden)
                 }
             }
 

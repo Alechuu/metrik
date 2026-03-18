@@ -159,7 +159,7 @@ public actor LocalGitService {
         let refArg = "origin/\(branch)"
 
         let result = await runGitAsync(
-            args: ["log", refArg, authorArg, "--format=\(format)", "--numstat", sinceArg],
+            args: ["log", refArg, "--first-parent", authorArg, "--format=\(format)", "--numstat", sinceArg],
             in: repoPath
         )
         guard result.exitCode == 0, let output = result.output else { return [] }

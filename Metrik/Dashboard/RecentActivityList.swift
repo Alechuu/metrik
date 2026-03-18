@@ -17,12 +17,22 @@ struct RecentActivityList: View {
                 Spacer()
 
                 if !recentCommits.isEmpty {
-                    Button("See All") {
+                    Button {
                         NotificationCenter.default.post(name: .openActivityDetail, object: nil)
+                    } label: {
+                        HStack(spacing: 3) {
+                            Text("See All")
+                                .underline()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.system(size: 10))
+                        }
+                        .font(.caption)
+                        .foregroundStyle(Color.mkTextSecondary)
                     }
-                    .font(.caption)
                     .buttonStyle(.plain)
-                    .foregroundStyle(Color.accentColor)
+                    .onHover { hovering in
+                        if hovering { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+                    }
                 }
             }
 

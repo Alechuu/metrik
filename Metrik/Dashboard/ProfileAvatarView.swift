@@ -5,6 +5,7 @@ struct ProfileAvatarView: View {
     let userName: String
     let userEmail: String
     let size: CGFloat
+    var customAvatarData: Data? = nil
 
     @State private var avatarImage: NSImage?
     @State private var didLoad = false
@@ -30,12 +31,18 @@ struct ProfileAvatarView: View {
         .frame(width: size, height: size)
         .background(Color.mkAccent.opacity(0.25))
         .clipShape(Circle())
-        .task(id: userEmail) {
+        .task(id: "\(userEmail)-\(customAvatarData?.count ?? 0)") {
             await loadAvatar()
         }
     }
 
     private func loadAvatar() async {
+        // Strategy 0: Custom avatar from settings
+        if let data = customAvatarData, let image = NSImage(data: data) {
+            avatarImage = image
+            return
+        }
+
         // Strategy 1: Gravatar via email
         if let image = await fetchImage(from: gravatarURL()) {
             avatarImage = image

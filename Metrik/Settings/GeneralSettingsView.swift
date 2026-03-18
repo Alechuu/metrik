@@ -87,6 +87,7 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
         .padding()
         .onAppear {
             ensureSettings()
@@ -179,7 +180,7 @@ struct GeneralSettingsView: View {
     private func requiredNumberRow(title: String, text: Binding<String>, field: RequiredField) -> some View {
         let showsError = hasLoadedDraftValues && trimmedText(text.wrappedValue).isEmpty
 
-        HStack(alignment: .top) {
+        HStack(alignment: .firstTextBaseline) {
             Text(title)
             Spacer()
 

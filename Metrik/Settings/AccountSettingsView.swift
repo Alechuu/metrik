@@ -1,10 +1,12 @@
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct AccountSettingsView: View {
     @Bindable var appState: AppState
     @Environment(\.modelContext) private var modelContext
     @Query private var configs: [LocalGitConfig]
+    @State private var isHoveringAvatar = false
 
     private var config: LocalGitConfig? { configs.first }
 
@@ -50,15 +52,51 @@ struct AccountSettingsView: View {
                 }
             }
         }
-        .padding(40)
+        .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func configuredInfo(_ config: LocalGitConfig) -> some View {
         VStack(spacing: 16) {
-            Image(systemName: "person.crop.circle.badge.checkmark")
-                .font(.system(size: 50))
-                .foregroundStyle(.green)
+            // Avatar with upload overlay
+            ZStack(alignment: .bottom) {
+                ProfileAvatarView(
+                    userName: config.gitUserName,
+                    userEmail: config.gitUserEmail,
+                    size: 80,
+                    customAvatarData: config.customAvatarData
+                )
+
+                // Edit overlay on hover
+                if isHoveringAvatar {
+                    Circle()
+                        .fill(.black.opacity(0.5))
+                        .frame(width: 80, height: 80)
+                        .overlay {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(.white)
+                        }
+                }
+            }
+            .onHover { hovering in
+                isHoveringAvatar = hovering
+            }
+            .onTapGesture {
+                pickAvatarImage(for: config)
+            }
+            .help("Click to change profile photo")
+
+            // Remove custom avatar button
+            if config.customAvatarData != nil {
+                Button("Remove custom photo") {
+                    config.customAvatarData = nil
+                    try? modelContext.save()
+                }
+                .font(.caption)
+                .buttonStyle(.plain)
+                .foregroundStyle(Color.mkTextSecondary)
+            }
 
             VStack(spacing: 4) {
                 Text(config.gitUserName)
@@ -80,5 +118,33 @@ struct AccountSettingsView: View {
                     .truncationMode(.middle)
             }
         }
+    }
+
+    private func pickAvatarImage(for config: LocalGitConfig) {
+        let panel = NSOpenPanel()
+        panel.title = "Choose Profile Photo"
+        panel.allowedContentTypes = [.png, .jpeg, .heic, .webP]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let image = NSImage(contentsOf: url) else { return }
+
+        // Resize to 256x256 max and store as JPEG
+        let targetSize = NSSize(width: 256, height: 256)
+        let resized = NSImage(size: targetSize)
+        resized.lockFocus()
+        image.draw(in: NSRect(origin: .zero, size: targetSize),
+                   from: NSRect(origin: .zero, size: image.size),
+                   operation: .copy,
+                   fraction: 1.0)
+        resized.unlockFocus()
+
+        guard let tiff = resized.tiffRepresentation,
+              let rep = NSBitmapImageRep(data: tiff),
+              let jpegData = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.85]) else { return }
+
+        config.customAvatarData = jpegData
+        try? modelContext.save()
     }
 }

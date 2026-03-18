@@ -53,7 +53,7 @@ struct DashboardView: View {
                 OffDayView()
                     .frame(height: 200)
             } else {
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     MetricsSummaryView(
                         metrics: appState.metrics,
                         goalMetric: selectedGoalMetric

@@ -65,6 +65,7 @@ struct MonthlyTrendChartView: View {
     let availableRepos: [String]
     let gitUserName: String
     let gitUserEmail: String
+    var customAvatarData: Data? = nil
     @State private var hoveredBarId: String?
     @State private var selectedMetric: ChartMetric = .linesPerHour
 
@@ -72,11 +73,10 @@ struct MonthlyTrendChartView: View {
     private var yMax: Double {
         let m = trendData.dataPoints.map { selectedMetric.value(for: $0) }.max() ?? 0
         guard m > 0 else { return 150 }
-        let steps: [Double] = [30, 50, 60, 90, 100, 120, 150, 200, 300, 500, 1000]
+        let steps: [Double] = [30, 50, 60, 90, 100, 120, 150, 200, 300, 500, 1000, 2000, 5000]
         return steps.first { $0 >= m * 1.15 } ?? (ceil(m * 1.15 / 50) * 50)
     }
 
-    // Six evenly-spaced labels from top (yMax) to bottom (0)
     private var yLabels: [Double] {
         let step = yMax / 5
         return (0...5).map { Double(5 - $0) * step }
@@ -101,15 +101,18 @@ struct MonthlyTrendChartView: View {
     private var headerRow: some View {
         VStack(spacing: 12) {
             HStack(spacing: 8) {
-                ProfileAvatarView(userName: gitUserName, userEmail: gitUserEmail, size: 30)
+                ProfileAvatarView(userName: gitUserName, userEmail: gitUserEmail, size: 30, customAvatarData: customAvatarData)
                 Text(gitUserName)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(Color.mkTextPrimary)
+
+                Spacer()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+
             Rectangle()
                 .fill(Color.white.opacity(0.08))
                 .frame(height: 1)
+
             HStack {
                 mkMenu(icon: "chart.bar", label: selectedMetric.rawValue) {
                     ForEach(ChartMetric.allCases, id: \.self) { metric in
@@ -185,7 +188,7 @@ struct MonthlyTrendChartView: View {
                     .foregroundStyle(Color.mkTextMuted)
                     .frame(maxHeight: .infinity, alignment: .top)
             }
-            Color.clear.frame(height: 20) // x-label row padding
+            Color.clear.frame(height: 20)
         }
         .frame(width: 40)
         .padding(.trailing, 8)
