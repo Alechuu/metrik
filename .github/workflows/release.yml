@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build Release
+        run: |
+          xcodebuild \
+            -project Metrik.xcodeproj \
+            -scheme Metrik \
+            -configuration Release \
+            -derivedDataPath .build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_ALLOWED=YES
+
+      - name: Re-sign with hardened runtime
+        run: |
+          codesign --force --deep --sign - --options runtime \
+            .build/Build/Products/Release/Metrik.app
+
+      - name: Verify signature
+        run: |
+          codesign -dv --verbose=4 .build/Build/Products/Release/Metrik.app
+
+      - name: Package
+        run: |
+          cd .build/Build/Products/Release
+          ditto -c -k --keepParent Metrik.app Metrik.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: .build/Build/Products/Release/Metrik.zip
+          generate_release_notes: true
+          body: |
+            ## Install
+
+            1. Download **Metrik.zip** below
+            2. Unzip and move **Metrik.app** to `/Applications`
+            3. Before first launch, open Terminal and run:
+               ```
+               xattr -cr /Applications/Metrik.app
+               ```
+            4. Double-click to open
+
+            > The `xattr` command removes the macOS quarantine flag. This is needed because the app is not notarized with Apple. You only need to do this once.
+            >
+            > Alternatively, right-click Metrik.app and choose **Open**, then click **Open** in the dialog.

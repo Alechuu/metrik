@@ -14,6 +14,20 @@ A macOS menu bar app that tracks your coding activity from local Git repositorie
 
 - **Settings** — Hours per day/week, sync interval, launch at login, Git identity, repo selection
 
+## Installation
+
+1. Download **Metrik.zip** from the [latest release](../../releases/latest)
+2. Unzip and move **Metrik.app** to `/Applications`
+3. Before first launch, open Terminal and run:
+   ```bash
+   xattr -cr /Applications/Metrik.app
+   ```
+4. Double-click to open
+
+> **Why `xattr`?** Metrik is not notarized with Apple (that requires a $99/year developer account). The `xattr` command removes the macOS quarantine flag so Gatekeeper allows the app to run. You only need to do this once.
+>
+> **Alternative:** Right-click Metrik.app, choose **Open**, then click **Open** in the dialog.
+
 ## Requirements
 
 - **macOS 14.0** or later
