@@ -9,46 +9,12 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: macos-15
+  release:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode project
-        run: xcodegen generate
-
-      - name: Build Release
-        run: |
-          xcodebuild \
-            -project Metrik.xcodeproj \
-            -scheme Metrik \
-            -configuration Release \
-            -derivedDataPath .build \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGNING_ALLOWED=YES
-
-      - name: Re-sign with hardened runtime
-        run: |
-          codesign --force --deep --sign - --options runtime \
-            .build/Build/Products/Release/Metrik.app
-
-      - name: Verify signature
-        run: |
-          codesign -dv --verbose=4 .build/Build/Products/Release/Metrik.app
-
-      - name: Package
-        run: |
-          cd .build/Build/Products/Release
-          ditto -c -k --keepParent Metrik.app Metrik.zip
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: .build/Build/Products/Release/Metrik.zip
           generate_release_notes: true
           body: |
             ## Install

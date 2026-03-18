@@ -31,21 +31,51 @@ A macOS menu bar app that tracks your coding activity from local Git repositorie
 ## Requirements
 
 - **macOS 14.0** or later
-- **Xcode** (for building)
-- **Swift 5** (project uses SwiftData, SwiftUI, `@Observable`)
+- **Xcode 26+** (for building — required for macOS 26 liquid glass APIs)
+- **XcodeGen** (`brew install xcodegen`)
 
 ## Building
 
-1. Clone the repo and open the project in Xcode:
+1. Clone the repo and generate the Xcode project:
    ```bash
    git clone <repo-url>
    cd metrik
-   open Metrik.xcodeproj
+   xcodegen generate
    ```
-2. Select the **Metrik** scheme and a **My Mac** destination.
-3. Build and run (**⌘R**).
+2. Open in Xcode, select the **Metrik** scheme, and build (**⌘R**). Or build from the command line:
+   ```bash
+   xcodebuild -project Metrik.xcodeproj -scheme Metrik -configuration Debug build \
+     CODE_SIGN_IDENTITY="-" CODE_SIGNING_ALLOWED=NO
+   ```
 
 The app will appear in the menu bar. On first launch you’ll go through the setup wizard.
+
+## Releasing
+
+Releases are built locally (Xcode 26 is required for the full liquid glass UI). To create a release:
+
+```bash
+# 1. Build
+xcodegen generate
+xcodebuild -project Metrik.xcodeproj -scheme Metrik -configuration Release \
+  -derivedDataPath .build CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual CODE_SIGNING_ALLOWED=YES
+
+# 2. Re-sign with hardened runtime
+codesign --force --deep --sign - --options runtime .build/Build/Products/Release/Metrik.app
+
+# 3. Package
+cd .build/Build/Products/Release
+ditto -c -k --keepParent Metrik.app Metrik.zip
+```
+
+Then tag and push — a GitHub Release is created automatically:
+
+```bash
+git tag v1.x
+git push origin main --tags
+```
+
+Upload `Metrik.zip` to the release on GitHub.
 
 ## Setup (first run)
 
